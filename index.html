@@ -13,16 +13,17 @@ label{display:block;font-size:12px;color:var(--sub);margin:4px 0 6px}
 input,select,button{font-size:16px}input,select{width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);background:#0e111a;color:#f5f7ff}
 .btn{width:100%;padding:12px;border:none;border-radius:12px;font-weight:700;background:var(--acc);color:#0a0a0a}
 .kv{display:flex;gap:8px;flex-wrap:wrap}.chip{background:#0e111a;border:1px solid var(--line);padding:6px 10px;border-radius:999px;font-size:13px}
-.note{font-size:13px;color:#cfd7f7;line-height:1.8}.small{font-size:12px;color:#9fb0d6}
+.note{font-size:13px;color:#cfd7f7;line-height:1.8;display:block;margin:8px 0 12px;position:relative;z-index:0}
+.small{font-size:12px;color:#9fb0d6}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}th{white-space:nowrap;color:#cfe0ff;text-align:left}
 
-/* グラフの重なり防止（修正版） */
-.bars{display:flex;gap:10px;align-items:flex-end;height:180px;border-bottom:1px dashed var(--line);padding:8px 4px 0}
-.barWrap{flex:1;min-width:56px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
-.bar{width:100%;min-width:40px;border-radius:8px 8px 0 0;background:linear-gradient(180deg,#67e8f9,#22d3ee)}
-.barLabel{margin-top:8px;text-align:center}
-@media(max-width:560px){.bars{gap:8px;height:160px}.barWrap{min-width:48px}}
+/* グラフの重なり防止＋余白 */
+.bars{position:relative;z-index:1;display:flex;gap:12px;align-items:flex-end;height:180px;border-bottom:1px dashed var(--line);padding:14px 6px 0;margin-top:0}
+.barWrap{flex:1;min-width:60px;display:flex;flex-direction:column;align-items:center;justify-content:flex-end}
+.bar{width:100%;min-width:44px;border-radius:8px 8px 0 0;background:linear-gradient(180deg,#67e8f9,#22d3ee)}
+.barLabel{margin-top:10px;text-align:center;line-height:1.3}
+@media(max-width:560px){.bars{gap:10px;height:160px;padding-top:16px}.barWrap{min-width:54px}}
 
 .badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:12px;margin-right:6px}
 .tag{display:block;margin:6px 0;padding:6px 10px;border-radius:10px;border:1px solid var(--line);background:#0e111a}
@@ -72,8 +73,8 @@ th,td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}th{whit
 
   <!-- 五行 -->
   <div class="card">
-    <h3>◆ 五行バランス（🌱育てる／🔥情熱／🏠整える／✨磨く／💬つなぐ）</h3>
-    <div class="note">棒＝“材料の配合”。多い→看板に、少ない→毎日の小さな習慣で育てる。</div>
+    <h3>◆ 五行バランス（木／火／土／金／水）</h3>
+    <div class="note">これはあなたの「傾向グラフ」です。<b>高い＝今の強み（武器）</b>、<b>低い＝伸ばすと良いポイント</b>。むずかしい言葉は使いません。</div>
     <div id="bars" class="bars"></div>
     <div id="fftags" style="margin-top:6px"></div>
     <div id="fiveExplain" style="margin-top:8px"></div>
@@ -176,38 +177,26 @@ function birthdayNum(d){return (d>=10)?reduceNum(""+d):d;}
 function personalYear(m,d,curY){return reduceNum(reduceNum(""+curY)+reduceNum(""+m)+reduceNum(""+d));}
 function personalMonth(py, calMonth){return reduceNum(py + calMonth);}
 
-// ===== 宿曜（27宿：やさしい長文） =====
+// ===== 宿曜（27宿：やさしい長文・簡易計算） =====
 var SHUKU_NAMES=["角","亢","氐","房","心","尾","箕","斗","女","虚","危","室","壁","奎","婁","胃","昴","畢","觜","参","井","鬼","柳","星","張","翼","軫"];
-var SHUKU_BASE=new Date("2000-01-06T18:14:00Z"); // 近似
+var SHUKU_BASE=new Date("2000-01-06T18:14:00Z"); // 近似基準
 function getShuku(y,m,d){var dt=new Date(Date.UTC(y,m-1,d));var diff=Math.floor((dt-SHUKU_BASE)/(1000*60*60*24));return SHUKU_NAMES[((diff%27)+27)%27];}
 var SHUKU_SOFT_DB={
-"角":{e:"木",intro:"『芽ぶきの星』。だれより早く“おもしろい”を見つけて動ける人。",love:"恋はゆっくり育てよう。短い合図（『どう思う？』）で安心を積み重ねてね。",work:"はじめの一歩の名人。新規・企画・開拓に◎。",meet:"朝の散歩・新しいカフェ・学びの場。",care:"深呼吸3回。『今日はここまででOK』と言おう。",charm:"🌱小さな芽でも本気で伸びてる。"},
-"亢":{e:"木",intro:"『誇りの星』。正直で美意識が高い人。",love:"不器用でも誠実が一番の魅力。『寂しかった』と素直に言えると近づける。",work:"品質・編集・デザイン・基準作り。",meet:"美術館・セレクト店・静かな喫茶。",care:"完璧で苦しくなったら“今日はここまで”。",charm:"🌿やさしい誇りでいこう."},
-"氐":{e:"土",intro:"『安定の星』。コツコツ信頼される土台作りの人。",love:"小さな思いやりを毎日ひとつ。相手の安心がふえていくよ。",work:"管理・経理・運用・サポートに◎。",meet:"地元の商店街・行きつけ・図書館。",care:"『大丈夫、私のペースでいい』と心に声かけ。",charm:"🏠焦らず、着実。"},
-"房":{e:"火",intro:"『華やかさの星』。笑顔が周りを明るくする太陽。",love:"褒め言葉は短く早く。『今日のそれ素敵！』で距離が縮む。",work:"広報・接客・イベント・エンタメ。",meet:"ライブ・にぎやかな場所。",care:"にぎやか疲れはスマホ10分おやすみ。",charm:"🔥笑顔は私の光。"},
-"心":{e:"火",intro:"『感受性の星』。感じる力がそのまま才能。",love:"言葉の前に一呼吸。やさしさがもっと届くよ。",work:"アート・研究・カウンセリングに◎。",meet:"夜の散歩・水辺・静かなバー。",care:"甘い物と深呼吸で鎮火。",charm:"💞心の炎は消えない。"},
-"尾":{e:"火",intro:"『やり抜く星』。約束を守る姿が色気。",love:"デートの『時間・場所・何する』をメモで共有。安心が増える。",work:"締切管理・品質管理・完了の番人。",meet:"ゴールを祝う場。",care:"タスクは半分に割ってOK。",charm:"🔥今日も一歩、完了。"},
-"箕":{e:"木",intro:"『情報の星』。話す・つなぐが得意。",love:"短文・テンポ良い連絡で心が近づく。",work:"営業・編集・PR・SNS運用に◎。",meet:"オンライン・勉強会・カフェ。",care:"“3行日記”で頭を整える。",charm:"💬ことばで心をつなごう。"},
-"斗":{e:"水",intro:"『守りの星』。大切なものを守る番人。",love:"ルールはやさしい声で提案。『こうすると安心かな？』",work:"財務・保管・在庫・家計に強い。",meet:"リユース店・倉庫型店舗。",care:"不安は紙に書き、できることに丸。",charm:"💧守るって、やさしい。"},
-"女":{e:"水",intro:"『聴く星』。相手の物語を受けとめる人。",love:"『つまりこう？』と要約で安心を作る。",work:"ケア・接客・HR・カウンセリング。",meet:"静かな公園・カフェ・サロン。",care:"耳を休める静かな10分。",charm:"💙やさしさは、私のつよさ。"},
-"虚":{e:"金",intro:"『理想の星』。新しい形を想像する改革者。",love:"理想＋今日の一歩を見せると信頼が増す。",work:"IT・企画・戦略・新規事業に◎。",meet:"コワーキング・新店めぐり。",care:"机を3分整えると地に足がつく。",charm:"✨空想を、今日の一歩へ。"},
-"危":{e:"金",intro:"『冒険の星』。前へ進む突破力。",love:"刺激は“安心の約束”とセットで。『ここまではOK？』",work:"スタートアップ・投資・第一線の営業。",meet:"ナイトイベント・アクティブな場。",care:"ぬるめのお風呂と早寝。",charm:"⚡勇気に、やさしいブレーキを。"},
-"室":{e:"水",intro:"『整える星』。仕組みで安心を作る人。",love:"段取り＝愛。予定の見える化で信頼UP。",work:"法務・PM・運用・ルール作り。",meet:"図書館・役所・整った街。",care:"肩と首を回して深呼吸。",charm:"🏠整えば、やさしく進む。"},
-"壁":{e:"土",intro:"『守護の星』。境界線を引ける頼れる人。",love:"『これは苦手、でもこれはOK』をやさしく伝える。",work:"セキュリティ・監査・規律運用。",meet:"会員制・クローズドな場。",care:"朝日を浴びて1分散歩。",charm:"🧱やさしい線引きは思いやり。"},
-"奎":{e:"木",intro:"『知恵の星』。言葉で世界を明るくする人。",love:"要点3つ（結論→理由→お願い）でスッと届く。",work:"編集・教育・文章・広報。",meet:"本屋・学びの場・静かなカフェ。",care:"好きな詩を1編読む。",charm:"📘ことばは、やさしい光。"},
-"婁":{e:"土",intro:"『整頓の星』。コツコツ支える“縁の下の力持ち”。",love:"予定共有＝愛の形。",work:"物流・運用・管理。",meet:"ホームセンター・実用店。",care:"5分だけぼーっと。",charm:"📅整えれば、心がやすむ。"},
-"胃":{e:"土",intro:"『育てる星』。ごはんとやさしさで満たす人。",love:"『一緒に食べる？』が愛のスイッチ。",work:"飲食・教育・ケア・実務。",meet:"市場・食イベント。",care:"“今必要なこと”を3つに絞る。",charm:"🍚いっしょに食べて、いっしょに笑おう。"},
-"昴":{e:"金",intro:"『観察の星』。細やかさが信頼に。",love:"指摘の前に1つほめる。心のドアがひらく。",work:"分析・監査・医療・校正。",meet:"ラボ・専門店。",care:"遠くの景色を30秒見る。",charm:"🔍やさしい目で見て、やさしい手で直す。"},
-"畢":{e:"金",intro:"『収穫と完結』。区切れる勇気が次を呼ぶ。",love:"“終わらせる”も愛。だから次へ進める。",work:"締切・納品・会計・クロージング。",meet:"仕事終わりのカフェ。",care:"80点提出で前進。",charm:"🌾区切るから、進める。"},
-"觜":{e:"水",intro:"『学びの星』。教える・伝えるが得意。",love:"学び合う恋が長続き。",work:"教育・通訳・研修・PR。",meet:"セミナー・図書館。",care:"『伝えたかった気持ち』をメモ。",charm:"📖学んで、やさしく分け合う。"},
-"参":{e:"木",intro:"『作戦の星』。地図を描いて進める人。",love:"作戦会議→小さく実行→振り返り。",work:"戦略・施工・現場運営。",meet:"工房・ワークショップ。",care:"肩回し＋『今日はここまで』。",charm:"🪶作戦は笑顔で始める。"},
-"井":{e:"水",intro:"『助け合いの星』。コミュニティ運営の人。",love:"『相談の合図』を決めると安心。",work:"NPO・チーム運営・シェア系。",meet:"地域の場・公共スペース。",care:"温かいスープと早寝。",charm:"🍵助け合いは、やさしさの循環。"},
-"鬼":{e:"木",intro:"『個性の星』。違う視点が宝物。",love:"『変わってるね』は褒め言葉。笑顔で『ありがとう』。",work:"研究・創作・スピ系。",meet:"専門店・小さなギャラリー。",care:"分かってくれる人に一言連絡。",charm:"👁変わってるは、輝いてる。"},
-"柳":{e:"水",intro:"『流れの星』。柔らかく和ませる人。",love:"まず肯定の相槌『うん、そうだね』。",work:"調整・接客・通訳。",meet:"川沿い・風通しの良い店。",care:"選択肢を2つに減らす。",charm:"🌊やわらかさは強さ。"},
-"星":{e:"火",intro:"『魅せる星』。演出と発信で心を動かす。",love:"『ありがとう』多めで恋が温まる。",work:"芸能・配信・ブランド。",meet:"劇場・フォトスポット。",care:"まず自分を褒める。",charm:"💫私の光で誰かが笑う。"},
-"張":{e:"火",intro:"『拡張の星』。広げる力と人望。",love:"『ふたりの目標』を一行で文字に。",work:"営業・組織づくり・イベント。",meet:"展示会・新店舗。",care:"姿勢を正して休憩。",charm:"🌈大きくなっても優しく。"},
-"翼":{e:"木",intro:"『支える星』。そっと背中を押す風。",love:"そばにいる事実が最大の愛。",work:"旅・輸送・案内。",meet:"駅・空港・旅先。",care:"足裏マッサージで落ち着く。",charm:"🪽わたしは風、やさしく運ぶ。"},
-"軫":{e:"水",intro:"『包み込む星』。困っている人に寄りそえる。",love:"『ありがとう』を先に言うと恋が温まる。",work:"医療・受付・調整・相談。",meet:"ボランティア・喫茶店。",care:"“今・明日・今度”に分ける。",charm:"💞やさしさは減らない魔法。"}};
+/* --- ここは要約版。あなたの環境のフル版DBがあれば差し替えてOK --- */
+"角":{e:"木",intro:"『芽ぶきの星』。だれより早く“おもしろい”を見つけて動ける人。",love:"恋はゆっくり育てよう。短い合図（『どう思う？』）で安心を積み重ねてね。",work:"はじめの一歩の名人。新規・企画・開拓に◎。",meet:"朝の散歩・新しいカフェ・学びの場。",care:"深呼吸3回。『今日はここまででOK』と言おう。",charm:"小さな芽でも本気で伸びてる。"},
+"亢":{e:"木",intro:"『誇りの星』。正直で美意識が高い人。",love:"不器用でも誠実が一番の魅力。『寂しかった』と素直に言えると近づける。",work:"品質・編集・デザイン・基準作り。",meet:"美術館・静かな喫茶。",care:"完璧で苦しくなったら“今日はここまで”。",charm:"やさしい誇りでいこう。"},
+"氐":{e:"土",intro:"『安定の星』。コツコツ信頼される土台作りの人。",love:"小さな思いやりを毎日ひとつ。",work:"管理・経理・運用・サポートに◎。",meet:"地元の商店街・図書館。",care:"『私のペースでいい』と心に声かけ。",charm:"焦らず、着実。"},
+"房":{e:"火",intro:"『華やかさの星』。笑顔が周りを明るくする太陽。",love:"褒め言葉は短く早く。『今日のそれ素敵！』で距離が縮む。",work:"広報・接客・イベント。",meet:"ライブ・にぎやかな場所。",care:"スマホ10分おやすみ。",charm:"笑顔は私の光。"},
+"心":{e:"火",intro:"『感受性の星』。感じる力がそのまま才能。",love:"言葉の前に一呼吸。やさしさがもっと届くよ。",work:"アート・研究・ケアに◎。",meet:"夜の散歩・水辺。",care:"甘い物と深呼吸で落ち着く。",charm:"心の炎は消えない。"},
+"尾":{e:"火",intro:"『やり抜く星』。約束を守る姿が色気。",love:"デートの『時間・場所・何する』を共有。",work:"締切管理・品質管理。",meet:"ゴールを祝う場。",care:"タスクは半分に割ってOK。",charm:"今日も一歩、完了。"},
+"箕":{e:"木",intro:"『情報の星』。話す・つなぐが得意。",love:"短文・テンポ良い連絡で心が近づく。",work:"営業・編集・PR。",meet:"オンライン・勉強会。",care:"“3行日記”で頭を整える。",charm:"ことばで心をつなごう。"},
+"女":{e:"水",intro:"『聴く星』。相手の物語を受けとめる人。",love:"『つまりこう？』と要約で安心を作る。",work:"ケア・接客・HR。",meet:"静かなカフェ。",care:"耳を休める静かな10分。",charm:"やさしさは、つよさ。"},
+"虚":{e:"金",intro:"『理想の星』。新しい形を想像する改革者。",love:"理想＋今日の一歩を見せると信頼UP。",work:"IT・企画・戦略。",meet:"コワーキング。",care:"机を3分整える。",charm:"空想を、今日の一歩へ。"},
+"婁":{e:"土",intro:"『整頓の星』。コツコツ支える“縁の下の力持ち”。",love:"予定共有＝愛の形。",work:"物流・運用・管理。",meet:"ホームセンター。",care:"5分だけぼーっと。",charm:"整えれば、心がやすむ。"},
+"星":{e:"火",intro:"『魅せる星』。発信で心を動かす。",love:"『ありがとう』多めで気持ちが伝わる。",work:"芸能・配信・ブランド。",meet:"劇場・撮影スポット。",care:"まず自分を褒める。",charm:"私の光で誰かが笑う。"},
+"張":{e:"火",intro:"『拡張の星』。広げる力と人望。",love:"『ふたりの目標』を一行に。",work:"営業・組織づくり。",meet:"展示会・新店舗。",care:"姿勢を正して休憩。",charm:"大きくなっても優しく。"},
+"水":{e:"水",intro:"『つなぐ星』。橋渡しが得意。",love:"短い言葉で気持ちを伝えると誤解が減る。",work:"情報・伝達・IT。",meet:"図書館・カフェ。",care:"散歩と3行メモ。",charm:"やさしい橋をかけよう。"}
+};
 
 // ===== 相性用・数秘ベーススコア =====
 var NCbase={1:{1:70,2:78,3:85,4:76,5:82,6:74,7:80,8:88,9:75,11:86,22:84,33:80},2:{1:78,2:72,3:77,4:82,5:74,6:86,7:80,8:70,9:83,11:85,22:76,33:84},3:{1:85,2:77,3:75,4:72,5:88,6:80,7:78,8:79,9:84,11:86,22:78,33:90},4:{1:76,2:82,3:72,4:74,5:70,6:80,7:85,8:86,9:73,11:78,22:88,33:76},5:{1:82,2:74,3:88,4:70,5:76,6:73,7:80,8:78,9:84,11:86,22:80,33:82},6:{1:74,2:86,3:80,4:80,5:73,6:78,7:76,8:82,9:88,11:84,22:80,33:86},7:{1:80,2:80,3:78,4:85,5:80,6:76,7:74,8:82,9:79,11:88,22:84,33:78},8:{1:88,2:70,3:79,4:86,5:78,6:82,7:82,8:76,9:80,11:84,22:90,33:80},9:{1:75,2:83,3:84,4:73,5:84,6:88,7:79,8:80,9:76,11:86,22:82,33:88},11:{1:86,2:85,3:86,4:78,5:86,6:84,7:88,8:84,9:86,11:82,22:86,33:90},22:{1:84,2:76,3:78,4:88,5:80,6:80,7:84,8:90,9:82,11:86,22:84,33:86},33:{1:80,2:84,3:90,4:76,5:82,6:86,7:78,8:80,9:88,11:90,22:86,33:84}};
@@ -230,54 +219,75 @@ function run(){
     '年：<b>'+ys+yb+'</b>（育ち/家）','月：<b>'+ms+mb+'</b>（社会/仕事）','日：<b>'+ds+db+'</b>（中心）','時：<b>'+hs+hb+'</b>（考え/将来）'
   ].map(x=>'<div class="chip">'+x+'</div>').join('');
 
-  // 命式表（やさしい）
+  // 命式表
   var TGtxt={"比肩":"自分でやる力","劫財":"仲間と突破","食神":"表現と楽しさ","傷官":"改善と分析","偏財":"ご縁とチャンス","正財":"約束と信頼","偏官":"挑戦と行動","正官":"役割と評価","偏印":"ひらめき","印綬":"学びと理解"};
   function row(p){var tg=tenGod(ds,p[1]), easy={"比肩":"自立/自分軸","劫財":"仲間で突破","食神":"楽しく表現","傷官":"改善/分析","偏財":"ご縁・行動","正財":"約束・信頼","偏官":"小さく挑戦","正官":"役割・評価","偏印":"直感を試す","印綬":"学びで強化"}[tg]||"";return '<tr><th>'+p[0]+'</th><td>'+p[1]+'</td><td>'+p[2]+'</td><td>'+tg+'</td><td>'+TGtxt[tg]+'</td><td class="small">'+p[3]+'｜'+easy+'</td></tr>';}
   document.getElementById("tbl").innerHTML='<table><thead><tr><th>柱</th><th>天干</th><th>地支</th><th>通変星</th><th>意味</th><th>やさしい読み方</th></tr></thead><tbody>'+
     [["年柱",ys,yb,"家の雰囲気"],["月柱",ms,mb,"社会での顔"],["日柱",ds,db,"性格の核心"],["時柱",hs,hb,"考え/将来像"]].map(row).join('')+
   '</tbody></table>';
 
-  // 五行（蔵干込み）＋“情熱”表現＆重なり防止描画
+  // 五行（蔵干込み）＋ラベル・重なり解消
   function zWeights(z){var l=ZM[z]||[]; if(l.length==1)return[1]; if(document.getElementById("zW").value==="eq"){return l.map(()=>1/l.length);} return l.length==2?[0.65,0.35]:[0.6,0.25,0.15].slice(0,l.length);}
   var vis=cnt([ys,ms,ds,hs]), zc={"木":0,"火":0,"土":0,"金":0,"水":0}, pillars=[[ys,yb],[ms,mb],[ds,db],[hs,hb]];
   for(var i=0;i<pillars.length;i++){var zlist=ZM[pillars[i][1]]||[], w=zWeights(pillars[i][1]); for(var j=0;j<zlist.length;j++){add(zc,cnt([zlist[j]]), w[j]||0);}}
   var useZ=document.getElementById("zOpt").value==="on", total={}; E.forEach(e=>total[e]=(vis[e]||0)+(useZ?zc[e]||0:0));
 
-  var nameEmoji={"木":"🌱育てる","火":"🔥情熱","土":"🏠整える","金":"✨磨く","水":"💬つなぐ"};
+  // 漢字ラベルのみ
+  var nameLabel={"木":"木","火":"火","土":"土","金":"金","水":"水"};
   var mx=Math.max.apply(null,E.map(e=>total[e]||0));
   var bars=E.map(function(e){
-    var h=mx?Math.round((total[e]||0)/mx*140)+8:8;
+    var h=mx?Math.round((total[e]||0)/mx*140)+10:10;
     return '<div class="barWrap"><div class="bar" style="height:'+h+'px"></div>'+
-           '<div class="barLabel small">'+nameEmoji[e]+'<br>'+((total[e]||0).toFixed(2))+'</div></div>';
+           '<div class="barLabel small">'+nameLabel[e]+'<br>'+((total[e]||0).toFixed(2))+'</div></div>';
   }).join('');
   document.getElementById("bars").innerHTML=bars;
 
-  // 五行テキスト（強み=武器／弱め=育成ポイント）
+  // 五行テキスト（専門語なし：サイン＋今日の具体策）
   var meaning={
-    "木":{title:"🌱育てる（学び・成長)", weapon:"あなたの武器は『育てる力』。人や企画を芽から大きくできる。教える・広めるを増やすと光る。", train:"“伸び悩み”は木不足のサイン。朝日→新しいこと1つ学ぶ→その日1行アウトプットで根が強くなる。"},
-    "火":{title:"🔥情熱（発信・熱意）", weapon:"あなたの武器は『情熱』。思いを言葉や行動で表すほど、周りの笑顔が増える。", train:"火が少ない時は“やる気が続かない”。白湯→深呼吸→『今日はここが良かった』と一言ポジティブ発言で再点火。"},
-    "土":{title:"🏠整える（安定・計画）", weapon:"武器は『段取り』。手順書・チェックリストで不安を消す。", train:"先延ばしは土不足。朝5分片付け＋“今日やる3つ”を紙に。"},
-    "金":{title:"✨磨く（判断・ルール）", weapon:"武器は『磨く力』。ムダを削って価値を際立たせる。基準を決め守るだけで信頼が増える。", train:"散らかりは金不足。捨て1→整え5分→情報1ページ整理の3点セット。"},
-    "水":{title:"💬つなぐ（情報・対話）", weapon:"武器は『つなぐ力』。調べて、まとめて、橋渡しができる。要約が得意。", train:"言葉が出づらい時は水不足。3行日記→独り言メモ→散歩で“流れ”を戻す。"}
+    "木":{title:"木：育てる（学び・成長）",
+      weapon:"あなたの強みは『育てる力』。人や企画を小さな芽から大きくできるよ。",
+      signs:"最近『新しいことにワクワクしにくい』『人にやさしくする余裕がない』と感じたら、休憩サイン。",
+      action:"朝に日光を3分浴びる→その日ひとつ新しいことを試す→夜に一行だけ感想を書く。『育つ感覚』が戻るよ。"
+    },
+    "火":{title:"火：情熱（発信・熱意）",
+      weapon:"強みは『情熱と発信力』。思いを短い言葉や行動で見せるほど、人の心が動く。",
+      signs:"『やる気が続かない』『気持ちが相手に伝わらない』と感じたら、リズムを整えよう。",
+      action:"白湯を一口→深呼吸→その日『よかったことを一言』だけ口に出す（またはメモ）。無理なく火がつく。"
+    },
+    "土":{title:"土：整える（安定・計画）",
+      weapon:"強みは『段取り』。手順が見えると、みんなが安心して進める。",
+      signs:"『後回しが増える』『部屋やタスクがごちゃつく』ときは、焦らず地ならし。",
+      action:"①5分だけ片づけ ②今日やる3つを書き出す ③1つだけ着手。小さく始めると流れが戻る。"
+    },
+    "金":{title:"金：磨く（判断・ルール）",
+      weapon:"強みは『磨く力』。ムダを減らして大事なものを光らせられる。",
+      signs:"『選べない』『情報が多くてつかれる』日は、いったん軽くする日に。",
+      action:"①いらない物を1つ手放す ②5分だけ整える ③メモ1ページを要点3つに。判断がスッと軽くなる。"
+    },
+    "水":{title:"水：つなぐ（情報・対話）",
+      weapon:"強みは『つなぐ力』。調べてまとめ、橋渡しができる人。",
+      signs:"『言葉が出にくい』『考えがまとまらない』ときは、頭を流してあげよう。",
+      action:"3行日記→ひとことメモ→5〜10分の散歩。流れが戻ると、言葉も自然に出てくる。"
+    }
   };
   var sumVal=E.reduce((a,k)=>a+(total[k]||0),0)||1, avg=sumVal/5;
   function levelName(v){ if(v>=avg*1.15) return "strong"; if(v<=avg*0.85) return "train"; return "normal"; }
   var ord=E.slice().sort((a,b)=>(total[b]||0)-(total[a]||0));
-  document.getElementById("fftags").innerHTML='<span class="badge">武器：'+nameEmoji[ord[0]]+'</span><span class="badge">育成：'+nameEmoji[ord[4]]+'</span>';
+  document.getElementById("fftags").innerHTML=
+    '<span class="badge">今の強み（武器）：'+nameLabel[ord[0]]+'</span>'+
+    '<span class="badge">伸ばすと良いポイント：'+nameLabel[ord[4]]+'</span>';
   document.getElementById("fiveExplain").innerHTML=E.map(function(k){
     var v=(total[k]||0), lv=levelName(v), x=meaning[k];
-    var tip=(lv==="strong"?x.weapon:lv==="train"?x.train:"いまのペースで大丈夫。");
-    var label=(lv==="strong"?"強み（武器）":lv==="train"?"育成ポイント":"標準（このまま）");
-    return '<div class="tag">'+x.title+' ／ <b>'+label+'</b> → '+tip+'</div>';
+    var head=(lv==="strong"?"今の強み（武器）":lv==="train"?"伸ばすと良いポイント":"ふつう（このままでOK）");
+    var body=(lv==="strong")?x.weapon:(lv==="train")?("よくあるサイン："+x.signs+" ／ 今日の具体策："+x.action):"今のペースで大丈夫。無理なく続けよう。";
+    return '<div class="tag">'+x.title+' ／ <b>'+head+'</b> → '+body+'</div>';
   }).join('');
 
-  // 通変星カウント（深掘りの軸）
+  // 通変星カウント・数秘
   var tgAll={}, pillarsGan=[ys,ms,hs];
   pillarsGan.forEach(g=>{var t=tenGod(ds,g); if(t) tgAll[t]=(tgAll[t]||0)+1;});
   (ZM[db]||[]).forEach(zg=>{var t=tenGod(ds,zg); if(t) tgAll[t]=(tgAll[t]||0)+1;});
   var topTG=Object.keys(tgAll).sort((a,b)=>(tgAll[b]||0)-(tgAll[a]||0));
-
-  // 数秘
   var lp=lifePath(y,m,d), bd=birthdayNum(d);
 
   // 性格・人間関係
@@ -289,15 +299,15 @@ function run(){
   // 恋愛観（短め・やさしい）
   function loveText(lp,eCore,tgLead,db){
     var base={
-      "木":"恋は『育てる作業』。あせらず会話を重ねて、少しずつ安心を増やそう。",
+      "木":"恋は『育てる』。あせらず会話を重ねて、少しずつ安心を増やそう。",
       "火":"恋は『情熱』。思いを言葉と行動で見せるほど、距離が縮む。",
-      "土":"恋は『安心設計』。約束・連絡・お金のルールが整うと一気に進む。",
+      "土":"恋は『安心設計』。約束・連絡・お金のルールが整うと進みやすい。",
       "金":"恋は『ていねいさ』。清潔感と小さな気づかいで誠実さが伝わる。",
-      "水":"恋は『対話』。気持ちを短い言葉で伝えると誤解が減る。"
+      "水":"恋は『対話』。短い言葉で気持ちを伝えると誤解が減る。"
     }[eCore];
-    var lpAdd={1:"リード上手。相手の気持ちを先に聞くと信頼UP。",2:"寄りそう天才。我慢しすぎ注意。",3:"楽しい恋。予定のドタキャンだけ注意。",4:"安定重視。将来像の共有が決め手。",5:"自由派。連絡のルールを先に決めて平和。",6:"世話焼き。自分ケアの日を作ろう。",7:"一人時間が燃料。静かな理解者に惹かれる。",8:"頼れる人。がんばりすぎたら甘える日を。",9:"共感型。境界線も大事に。",11:"心の通い合い重視。焦らず育てよう。",22:"大きな目標を一緒に追うと最強。",33:"包容力の塊。抱え込みすぎ注意。"}[lp];
-    var tgAdd={"比肩":"『私はこうしたい』を素直に。","劫財":"一緒に作戦会議が近道。","食神":"笑顔とユーモアが武器。","傷官":"ダメ出しは『提案の形』で。","偏財":"会う回数＝安心。軽い誘いを増やそう。","正財":"小さな約束を守るほど自然に結婚の話に。","偏官":"勢いは魅力、結論前に一呼吸。","正官":"礼儀と落ち着きが好印象。","偏印":"直感だけで判断しない。言葉で補足。","印綬":"学び合いが長続きの鍵。"}[tgLead]||"";
-    var peach = PEACH_BY_DAY[db] ? "あなたの日支「"+db+"」の桃花は「"+PEACH_BY_DAY[db]+"」。その月や人は“出会いの風”。" : "";
+    var lpAdd={1:"リード上手。相手の気持ちを先に聞くと信頼UP。",2:"寄りそう天才。我慢しすぎ注意。",3:"楽しい恋。ドタキャンだけ注意。",4:"安定重視。将来像の共有が決め手。",5:"自由派。連絡ルールを先に決めて平和。",6:"世話焼き。自分ケアの日を作ろう。",7:"一人時間が燃料。静かな理解者に惹かれる。",8:"頼れる人。がんばりすぎたら甘える日を。",9:"共感型。境界線も大事に。",11:"心の通い合い重視。焦らず育てよう。",22:"大きな目標を一緒に追うと最強。",33:"包容力の塊。抱え込みすぎ注意。"}[lp];
+    var tgAdd={"比肩":"『私はこうしたい』を素直に。","劫財":"一緒に作戦会議が近道。","食神":"笑顔とユーモアが武器。","傷官":"ダメ出しは『提案の形』で。","偏財":"会う回数＝安心。軽い誘いを増やそう。","正財":"小さな約束を守るほど結婚の話に。","偏官":"勢いは魅力、結論前に一呼吸。","正官":"礼儀と落ち着きが好印象。","偏印":"直感だけで判断しない。言葉で補足。","印綬":"学び合いが長続きの鍵。"}[tgLead]||"";
+    var peach = PEACH_BY_DAY[db] ? "あなたの日支「"+db+"」の『出会い運が上がる干支』は「"+PEACH_BY_DAY[db]+"」。その月や人はチャンスが来やすいよ。" : "";
     return [base,lpAdd,tgAdd,peach].filter(Boolean).map(s=>'<div class="note">'+s+'</div>').join("");
   }
   document.getElementById("loveView").innerHTML=loveText(lp,SE[ds],topTG[0],db);
@@ -308,17 +318,17 @@ function run(){
   var lpJob={1:"起業/営業/企画/管理",2:"人事/秘書/接客/ケア",3:"デザイン/広報/教育",4:"経理/行政/建築/品質",5:"営業/旅行/マーケ/通訳",6:"医療/福祉/美容/教育",7:"研究/分析/開発/コンサル",8:"管理職/不動産/金融",9:"教育/福祉/企画/広報",11:"アート/表現/カウンセリング",22:"経営/社会事業/建設/仕組み化",33:"教育/ケア/表現/コミュニティ"};
   var roleTip={"木":"企画/育成の役","火":"広報/推進の役","土":"進行/品質の役","金":"監査/整備の役","水":"情報/分析の役"}[strong];
   document.getElementById("business").innerHTML=[
-    '五行の強み：<b>'+nameEmoji[strong]+'</b> → '+bizMap[strong],
+    '五行の強み：<b>'+nameLabel[strong]+'</b> → '+bizMap[strong],
     '数秘の適職：<b>'+lp+'</b> → '+lpJob[lp],
     'チームでの役割：<b>'+roleTip+'</b>',
-    '育成ポイント：<b>'+nameEmoji[weak]+'</b> → '+{"木":"朝日とストレッチ＋“ありがとう”の声出し","火":"白湯→深呼吸→『今日はここが良かった』と一言発信","土":"小さな締切で“やる日/休む日”を分ける","金":"捨て1・整え5分・情報1ページ整理","水":"3行日記・散歩・対話"}[weak]
+    '伸ばすポイント：<b>'+nameLabel[weak]+'</b> → '+{"木":"朝日とストレッチ＋“ありがとう”の声出し","火":"白湯→深呼吸→『今日はここが良かった』と一言発信","土":"小さな締切で“やる日/休む日”を分ける","金":"捨て1・整え5分・メモ1ページ整理","水":"3行日記・散歩・対話"}[weak]
   ].map(x=>'<div class="note">'+x+'</div>').join("");
 
   // 長所・短所
   var deepShort={"木":{pro:"面倒見と成長力",con:"優しさが後回しに化ける"}, "火":{pro:"情熱で人を動かす",con:"勢いが強すぎると相手が疲れる"}, "土":{pro:"安定と継続",con:"慎重すぎて機会損失"}, "金":{pro:"基準と品質",con:"完璧主義でスピード低下"}, "水":{pro:"情報収集と伝達",con:"考えすぎて動けない"}};
   var fix={"木":"毎朝5分の学び","火":"白湯＋一言ポジティブ発信","土":"小さな締切を置く","金":"5分片付け/基準決め","水":"3行日記/散歩/対話"};
-  var strengths=['長所：<b>'+nameEmoji[strong]+'</b>（'+deepShort[strong].pro+'）を前に出す。',
-                 '短所：<b>'+nameEmoji[weak]+'</b>が弱い → '+deepShort[weak].con+'。だから“'+fix[weak]+'”を習慣に。'];
+  var strengths=['長所：<b>'+nameLabel[strong]+'</b>（'+deepShort[strong].pro+'）を前に出す。',
+                 '短所：<b>'+nameLabel[weak]+'</b>が弱い → '+deepShort[weak].con+'。だから“'+fix[weak]+'”を習慣に。'];
   if(topTG[0]==="傷官") strengths.push('［注意］ダメ出しは“提案の形”で。時間を区切って出す。');
   if(topTG[0]==="偏官") strengths.push('［注意］勢い余りやすい → 一呼吸置いてから話す。');
   if(topTG[0]==="正財") strengths.push('［注意］抱え込みすぎ → 役割分担と締切共有。');
@@ -326,7 +336,7 @@ function run(){
 
   // 宿曜
   var shuku=getShuku(y,m,d);
-  document.getElementById("shukuOut").innerHTML=(function(name){var x=SHUKU_SOFT_DB[name]; if(!x)return '<div class="tag">本命宿：<b>'+name+'</b>（準備中）</div>'; return '<div class="tag"><b>🌙 本命宿：'+name+'</b>（'+x.e+'の気質）</div><p class="note">【あなたは】'+x.intro+'</p><p class="note">【恋愛】'+x.love+'</p><p class="note">【お仕事】'+x.work+'</p><p class="note">【出会い】'+x.meet+'</p><p class="note">【こころケア】'+x.care+'</p><p class="note"><b>'+x.charm+'</b></p>';})(shuku);
+  document.getElementById("shukuOut").innerHTML=(function(name){var x=SHUKU_SOFT_DB[name]; if(!x)return '<div class="tag">本命宿：<b>'+name+'</b>（準備中）</div>'; return '<div class="tag"><b>本命宿：'+name+'</b>（'+x.e+'の気質）</div><p class="note">【あなたは】'+x.intro+'</p><p class="note">【恋愛】'+x.love+'</p><p class="note">【お仕事】'+x.work+'</p><p class="note">【出会い】'+x.meet+'</p><p class="note">【こころケア】'+x.care+'</p><p class="note"><b>'+x.charm+'</b></p>';})(shuku);
 
   // ===== 相性 =====
   document.getElementById("compatBtn").onclick=function(){
@@ -347,21 +357,25 @@ function run(){
     var bizScore=Math.max(0,Math.min(100, Math.round(siJuScore*0.6 + numScore*0.4 + roleBoost)));
     function face(s){return s>=86?"◎":(s>=80?"◯":(s>=74?"△":"▲"));}
 
-    var talkTips=["感想→理由→お願いの順で短く","まず要約→自分の気持ち→次の一歩","嬉しかった点→困った点→一緒に試したいこと"];
+    var talkTips=[
+      "①気持ち ②理由 ③お願い（短く）で伝えよう",
+      "『うれしかった→困った→こうしたい』の順で言おう",
+      "結論→理由→一緒にやる一歩、でOK"
+    ];
     var tt=talkTips[(y+m+d+y2+m2+d2)%talkTips.length];
 
     function loveAdvice(s){
       var a=[];
-      if(s<75)a.push("すれ違いは『"+tt+"』でやさしく伝えてみて。");
-      if(inPairs(HEX, db, db2))a.push("六合カップル：会う回数を少し増やすほど絆UP。");
-      if(inPairs(CHONG, db, db2))a.push("冲カップル：先に“共通の目的”を一行で決めてから会話を。");
-      a.push("デートは「"+({"木":"散歩や本屋","火":"ライブや外食","土":"家ごはんや整える日","金":"美術館やきれいな場所","水":"カフェで長話"}[SE[ds]])+"」が定番の勝ちパターン。");
+      if(s<75)a.push("すれ違いは『"+tt+"』で短く。長文より短文が安心だよ。");
+      if(inPairs(HEX, db, db2))a.push("相性◎（六合）：会う回数を少し増やすほど仲良くなれるよ。");
+      if(inPairs(CHONG, db, db2))a.push("衝突しやすい組み合わせ：先に二人の目標を一文で決めてから話そう。");
+      a.push("迷ったら「"+({"木":"散歩や本屋","火":"ライブや外食","土":"家ごはんや片づけデー","金":"美術館や静かな場所","水":"カフェでゆっくり話す"}[SE[ds]])+"」が失敗しにくいよ。");
       return a.join(" ");
     }
     function friendAdvice(s){
       var a=[];
       if(s<75)a.push("連絡頻度（週1/隔週）を最初に合意。");
-      a.push((CTL[SE[ds]]===SE[ds2]||CTL[SE[ds2]]===SE[ds])?"担当分け（企画/まとめ/連絡）で摩擦回避。":"共通の趣味時間をカレンダー固定。");
+      a.push((CTL[SE[ds]]===SE[ds2]||CTL[SE[ds2]]===SE[ds])?"『企画』『まとめ役』『連絡係』の役割分担で摩擦回避。":"共通の趣味時間をカレンダー固定。");
       a.push("『ありがとう』はその日のうちに短文で。");
       return a.join(" ");
     }
@@ -370,7 +384,7 @@ function run(){
       if(GEN[SE[ds]]===SE[ds2])a.push("あなた→相手：育成/コーチ適性。");
       if(CTL[SE[ds]]===SE[ds2])a.push("あなた→相手：KPIや締切設計を担当。");
       if(CTL[SE[ds2]]===SE[ds])a.push("相手→あなた：進捗チェックを任せる。");
-      a.push("会議は『決める人→順番→期限』を冒頭で宣言。共有メモで透明化。");
+      a.push("仕事の話は最初に『誰が決める・何を決める・いつまで』を宣言。共有メモで透明化。");
       return a.join(" ");
     }
 
