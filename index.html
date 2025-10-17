@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="ja"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>四柱推命＋数秘術 Pro（高精度・相性アドバイス強化）</title>
+<title>四柱推命＋数秘術 Pro（総合リーディング＆時期判定）</title>
 <style>
 :root{--bg:#0b0c10;--card:#151821;--ink:#f5f7ff;--sub:#b6c0d6;--acc:#7ee1b5;--line:#23283a;--good:#66bb6a;--warn:#ffb74d;--bad:#ef5350}
 *{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"Hiragino Sans","Noto Sans JP",Roboto,Arial;line-height:1.6}
@@ -13,7 +13,7 @@ label{display:block;font-size:12px;color:var(--sub);margin:4px 0 6px}
 input,select,button{font-size:16px}input,select{width:100%;padding:10px;border-radius:12px;border:1px solid var(--line);background:#0e111a;color:#f5f7ff}
 .btn{width:100%;padding:12px;border:none;border-radius:12px;font-weight:700;background:var(--acc);color:#0a0a0a}
 .kv{display:flex;gap:8px;flex-wrap:wrap}.chip{background:#0e111a;border:1px solid var(--line);padding:6px 10px;border-radius:999px;font-size:13px}
-.note{font-size:12px;color:#bfc9e6}
+.note{font-size:12px;color:#bfc9e6}.small{font-size:12px;color:#9fb0d6}
 table{width:100%;border-collapse:collapse;font-size:14px}
 th,td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}th{white-space:nowrap;color:#cfe0ff;text-align:left}
 .bars{display:flex;gap:8px;align-items:flex-end;height:150px;border-bottom:1px dashed var(--line);padding:6px 2px}
@@ -21,29 +21,37 @@ th,td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}th{whit
 .badge{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:2px 8px;font-size:12px;margin-right:6px}
 .err{display:none;background:#331a1a;color:#ffc9c9;border:1px solid #5b2a2a;padding:8px;border-radius:8px;margin-top:6px;font-size:13px}
 .tag{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:4px 8px;font-size:12px;margin:2px;color:#e0f2f1}
-.small{font-size:12px;color:#9fb0d6}
 .hr{height:1px;background:var(--line);margin:8px 0}
 .good{color:var(--good)} .warn{color:var(--warn)} .bad{color:var(--bad)}
+.grid2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+@media(max-width:560px){.grid2{grid-template-columns:1fr}}
+.kcell{border:1px solid var(--line);border-radius:10px;padding:8px}
+.kcal{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.km{border:1px solid var(--line);border-radius:10px;padding:8px;text-align:center}
+.km b{display:block;margin-bottom:4px}
+.hitBoth{border-color:#7ee1b5;background:rgba(126,225,181,.12)}
+.hitNum{border-color:#4fc3f7;background:rgba(79,195,247,.08)}
+.hitSi{border-color:#ffb74d;background:rgba(255,183,77,.10)}
 </style></head>
 <body>
 <header>
-  <h1>四柱推命＋数秘術 Pro（高精度）</h1>
-  <small>定気法の節入り（JST）で月柱判定／相性スコアに用途別アドバイスを表示</small>
+  <h1>四柱推命＋数秘術 Pro</h1>
+  <small>性格・恋愛観・仕事の向き・長所/短所・時期（結婚/出会い/転職/独立）を自動表示</small>
 </header>
 
 <main>
   <!-- 入力 -->
   <div class="card">
     <div class="row">
-      <div class="col"><label>年(西暦)</label><input id="y" type="number" value="1989"></div>
-      <div class="col"><label>月</label><input id="m" type="number" min="1" max="12" value="5"></div>
-      <div class="col"><label>日</label><input id="d" type="number" min="1" max="31" value="31"></div>
+      <div class="col"><label>年(西暦)</label><input id="y" type="number" value="1990"></div>
+      <div class="col"><label>月</label><input id="m" type="number" min="1" max="12" value="1"></div>
+      <div class="col"><label>日</label><input id="d" type="number" min="1" max="31" value="1"></div>
       <div class="col"><label>出生時刻（24h, 例 12:00）</label><input id="hm" value="12:00"></div>
     </div>
     <div class="row">
       <div class="col"><label>蔵干を五行に含める</label><select id="zOpt"><option value="on">含める</option><option value="off">含めない</option></select></div>
       <div class="col"><label>蔵干ウェイト</label><select id="zW"><option value="eq">等分</option><option value="pri">主0.6/次0.25/末0.15</option></select></div>
-      <div class="col"><label>月柱の判定</label><select id="setu"><option value="const">高精度：定気法（推奨）</option><option value="mean">簡易：平均節入り</option></select></div>
+      <div class="col"><label>月柱の判定</label><select id="setu"><option value="const">高精度：定気法</option><option value="mean">簡易：平均節入り</option></select></div>
       <div class="col"><label>　</label><button class="btn" id="run">鑑定する</button></div>
     </div>
     <div id="err" class="err">日付/時刻を見直してね</div>
@@ -52,20 +60,31 @@ th,td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}th{whit
   <!-- 命式 -->
   <div class="card">
     <h3>◆ 命式（四柱）＋やさしい読み方</h3>
-    <div id="ms" class="kv" style="margin-top:6px"></div>
+    <div class="kv" id="ms"></div>
     <div id="tbl" style="margin-top:8px"></div>
   </div>
 
   <!-- 五行 -->
   <div class="card">
     <h3>◆ 五行バランス（木火土金水）</h3>
-    <div class="note">棒グラフ＝“材料配合”。多い→その強みを使う／少ない→習慣で少し足す。</div>
+    <div class="note">棒＝“材料配合”。多い→その強みを使う／少ない→習慣で少し足す。</div>
     <div id="bars" class="bars"></div>
     <div id="fftags" style="margin-top:6px"></div>
     <div id="fiveExplain" style="margin-top:8px"></div>
   </div>
 
-  <!-- 相性（四柱＋数秘） -->
+  <!-- 総合リーディング（四柱＋数秘） -->
+  <div class="card">
+    <h3>◆ 総合リーディング（四柱＋数秘）</h3>
+    <div class="grid2">
+      <div class="kcell"><b>性格・才能・人間関係の傾向</b><div id="traits"></div></div>
+      <div class="kcell"><b>恋愛観（四柱＋数秘）</b><div id="loveView"></div></div>
+      <div class="kcell"><b>おすすめのビジネス／働き方</b><div id="business"></div></div>
+      <div class="kcell"><b>長所・短所（使い方のコツ）</b><div id="strengths"></div></div>
+    </div>
+  </div>
+
+  <!-- 相性（四柱＋数秘：恋愛／友情／ビジネス） -->
   <div class="card">
     <h3>◆ 相性（四柱＋数秘：恋愛／友情／ビジネス）</h3>
     <div class="row">
@@ -77,18 +96,26 @@ th,td{padding:8px;border-bottom:1px solid var(--line);vertical-align:top}th{whit
     </div>
     <div id="compatOut" style="margin-top:6px"></div>
   </div>
+
+  <!-- 時期判定（四柱＋数秘のW基準） -->
+  <div class="card">
+    <h3>◆ 時期のサイン（これから12か月）</h3>
+    <div class="note">色の意味：<span class="hitBoth">四柱＋数秘の両方で◎</span>／<span class="hitNum">数秘で◎</span>／<span class="hitSi">四柱で◎</span></div>
+    <div id="timing" class="kcal" style="margin-top:6px"></div>
+    <div class="small" id="timingLegend"></div>
+  </div>
 </main>
 
 <script>
 // ===== 干支・五行 基本データ =====
 var S=["甲","乙","丙","丁","戊","己","庚","辛","壬","癸"], SE={"甲":"木","乙":"木","丙":"火","丁":"火","戊":"土","己":"土","庚":"金","辛":"金","壬":"水","癸":"水"}, SY={"甲":"陽","乙":"陰","丙":"陽","丁":"陰","戊":"陽","己":"陰","庚":"陽","辛":"陰","壬":"陽","癸":"陰"};
-var B=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"]; // 月支配列は立春を「寅」とする
-var MB=["寅","卯","辰","巳","午","未","申","酉","戌","亥","子","丑"];
+var B=["子","丑","寅","卯","辰","巳","午","未","申","酉","戌","亥"], MB=["寅","卯","辰","巳","午","未","申","酉","戌","亥","子","丑"];
 var ZM={"子":["壬"],"丑":["己","癸","辛"],"寅":["甲","丙","戊"],"卯":["乙"],"辰":["戊","乙","癸"],"巳":["丙","戊","庚"],"午":["丁","己"],"未":["己","丁","乙"],"申":["庚","壬","戊"],"酉":["辛"],"戌":["戊","辛","丁"],"亥":["壬","甲"]};
 var E=["木","火","土","金","水"], GEN={"木":"火","火":"土","土":"金","金":"水","水":"木"}, CTL={"木":"土","土":"水","水":"火","火":"金","金":"木"};
-var TGtxt={"比肩":"自分でやる力","劫財":"仲間と突破","食神":"表現と楽しさ","傷官":"改善と分析","偏財":"ご縁とチャンス","正財":"約束と信頼","偏官":"挑戦と行動","正官":"役割と評価","偏印":"ひらめき","印綬":"学びと理解"};
 var HEX=[["子","丑"],["寅","亥"],["卯","戌"],["辰","酉"],["巳","申"],["午","未"]];
 var CHONG=[["子","午"],["丑","未"],["寅","申"],["卯","酉"],["辰","戌"],["巳","亥"]];
+var BR_E={"子":"水","丑":"土","寅":"木","卯":"木","辰":"土","巳":"火","午":"火","未":"土","申":"金","酉":"金","戌":"土","亥":"水"};
+var PEACH_BY_DAY={"寅":"卯","午":"卯","戌":"卯","申":"酉","子":"酉","辰":"酉","亥":"子","卯":"子","未":"子","巳":"午","酉":"午","丑":"午"};
 
 // ===== ユーティリティ（日付→干支） =====
 function parseHM(s){if(!s)return[12,0];var m=/^(\d{1,2}):(\d{2})$/.exec(s);if(!m)return[12,0];var h=+m[1],mm=+m[2];return[Math.min(23,Math.max(0,h)),Math.min(59,Math.max(0,mm))];}
@@ -102,116 +129,44 @@ function cnt(stems){var c={"木":0,"火":0,"土":0,"金":0,"水":0}; for(var i=0
 function add(dst,src,w){w=w||1; for(var k in dst){dst[k]+= (src[k]||0)*w;}}
 function inPairs(list,a,b){for(var i=0;i<list.length;i++){var p=list[i]; if((p[0]==a&&p[1]==b)||(p[0]==b&&p[1]==a)) return true;} return false;}
 
-// ===== 二十四節気（定気法・JST）簡易実装 =====
-// 参考：Meeusの低精度太陽黄経をJSで簡略（十分な実務精度）。節気は黄経0,30,60...。
-// 端数誤差低減のためJST(UTC+9)換算後に日付比較。失敗時は平均節入りをフォールバック。
+// ===== 二十四節気（定気法・JST）簡易 =====
 function toJD(date){return JDN(date.getUTCFullYear(),date.getUTCMonth()+1,date.getUTCDate()) + (date.getUTCHours()-12)/24 + date.getUTCMinutes()/1440;}
-function sunLonDeg(jd){ // 低精度（誤差≲0.5°程度）
-  var T=(jd-2451545.0)/36525;
-  var L0=(280.46646+36000.76983*T+0.0003032*T*T)%360;
-  var M=357.52911+35999.05029*T-0.0001537*T*T;
-  var C=(1.914602-0.004817*T-0.000014*T*T)*Math.sin(M*Math.PI/180)
-       +(0.019993-0.000101*T)*Math.sin(2*M*Math.PI/180)
-       +0.000289*Math.sin(3*M*Math.PI/180);
-  var trueLon=L0+C;
-  return (trueLon+360)%360;
-}
-function findTermJST(year){ // 各節気のJST日時（ざっくり）
-  var out=[]; // 0:立春(315°)→小寒(300°)だとズレるため、基準を立春=315°→寅月開始扱い
-  var targets=[315,345,15,45,75,105,135,165,195,225,255,285]; // 立春から月境界用
-  // 探索：各月境界の近辺で2時間刻み→二分探索
+function sunLonDeg(jd){var T=(jd-2451545.0)/36525;var L0=(280.46646+36000.76983*T+0.0003032*T*T)%360;var M=357.52911+35999.05029*T-0.0001537*T*T;var C=(1.914602-0.004817*T-0.000014*T*T)*Math.sin(M*Math.PI/180)+(0.019993-0.000101*T)*Math.sin(2*M*Math.PI/180)+0.000289*Math.sin(3*M*Math.PI/180);var trueLon=L0+C;return (trueLon+360)%360;}
+function findTermJST(year){
+  var out=[],targets=[315,345,15,45,75,105,135,165,195,225,255,285];
   for(var i=0;i<targets.length;i++){
-    var approx=new Date(Date.UTC(year, i<11?i+1:0, 4, 6, 0)); // 節入りは毎月4～8日付近
-    var jd0=toJD(approx);
-    var step=0.5/24; // 30分刻み
-    var best=jd0, last=999;
+    var approx=new Date(Date.UTC(year, i<11?i+1:0, 4, 6, 0));
+    var jd0=toJD(approx), step=0.5/24, best=jd0, last=999;
     for(var k=-240;k<=240;k++){
-      var jd=jd0+k*step, lon=sunLonDeg(jd);
-      var diff=((lon - targets[i] + 540)%360)-180;
+      var jd=jd0+k*step, lon=sunLonDeg(jd), diff=((lon - targets[i] + 540)%360)-180;
       if(Math.abs(diff)<last){last=Math.abs(diff);best=jd;}
     }
-    // JSTへ
-    var d=new Date((best-2440587.5)*86400000); // JD→UTC
-    var jst=new Date(d.getTime()+9*3600000);
+    var d=new Date((best-2440587.5)*86400000); var jst=new Date(d.getTime()+9*3600000);
     out.push(jst);
   }
-  return out; // 12境界：立春→小寒の手前
+  return out;
 }
-
-// 簡易（平均）節入り（フォールバック）
 var meanSetu=[{m:2,d:4},{m:3,d:6},{m:4,d:5},{m:5,d:6},{m:6,d:6},{m:7,d:7},{m:8,d:7},{m:9,d:7},{m:10,d:8},{m:11,d:7},{m:12,d:7},{m:1,d:6}];
-
-// 年柱（節分基準）
-function yearP(y,m,d){
-  // 立春（だいたい2/4）より前は前年
-  // 定気法で2月の立春を確認（失敗時はフォールバック）
-  try{
-    var terms=findTermJST(y); // 0:立春(JST)
-    var risshun=terms[0];
-    var cur=new Date(y, m-1, d, 12); // JST正午基準
-    var jy=(cur<risshun)?(y-1):y;
-    var yi=((jy-1984)%60+60)%60;
-    return [S[yi%10],B[yi%12]];
-  }catch(e){
-    var before=(m<2)||(m==2&&d<4),jy=before?y-1:y;
-    var yi=((jy-1984)%60+60)%60;return [S[yi%10],B[yi%12]];
-  }
-}
-
-// 月柱（定気法／平均の切り替え）
+function yearP(y,m,d){try{var terms=findTermJST(y);var risshun=terms[0];var cur=new Date(y,m-1,d,12);var jy=(cur<risshun)?(y-1):y;var yi=((jy-1984)%60+60)%60;return [S[yi%10],B[yi%12]];}catch(e){var before=(m<2)||(m==2&&d<4),jy=before?y-1:y;var yi=((jy-1984)%60+60)%60;return [S[yi%10],B[yi%12]];}}
 function monthP(y,m,d,ys){
-  function autoIndex(){ // 定気法：立春＝寅月(0)
-    try{
-      var terms=findTermJST(y); // 12個（立春～）
-      var boundaries=[]; for(var i=0;i<12;i++){boundaries.push(terms[i]);}
-      var cur=new Date(y, m-1, d, 12);
-      var idx=-1;
-      for(var i=0;i<12;i++){
-        if(i<11){ if(cur>=boundaries[i] && cur<boundaries[i+1]){ idx=i; break; } }
-        else{ // 小寒手前まで
-          var nextYear=findTermJST(y+1)[0]; // 来年立春
-          if(cur>=boundaries[i] && cur<nextYear){ idx=i; break; }
-        }
-      }
-      if(idx<0) idx=11;
-      return idx; // 0..11 → MB配列へ
-    }catch(e){
-      // 平均節入りにフォールバック
-      var arr=[],i;for(i=0;i<12;i++){var t=meanSetu[i],yy=y,mm=t.m;if(mm==1)yy=y+1;arr.push({y:yy,m:mm,d:t.d,idx:i});}
-      var v=y*10000+m*100+d;for(i=0;i<12;i++){var a=arr[i],tv=a.y*10000+a.m*100+a.d;if(v<tv)return (i+11)%12;}return 11;
-    }
-  }
-  var idx=(document.getElementById("setu").value==="const")?autoIndex(): (function(){
-    var arr=[],i;for(i=0;i<12;i++){var t=meanSetu[i],yy=y,mm=t.m;if(mm==1)yy=y+1;arr.push({y:yy,m:mm,d:t.d,idx:i});}
-    var v=y*10000+m*100+d;for(i=0;i<12;i++){var a=arr[i],tv=a.y*10000+a.m*100+a.d;if(v<tv)return (i+11)%12;}return 11;
-  })();
-  var br=MB[idx];
-  var map={"甲":"丙","己":"丙","乙":"戊","庚":"戊","丙":"庚","辛":"庚","丁":"壬","壬":"壬","戊":"甲","癸":"甲"}, st=map[ys], si=S.indexOf(st);
+  function autoIndex(){try{var terms=findTermJST(y);var cur=new Date(y,m-1,d,12);var idx=-1;for(var i=0;i<12;i++){var a=terms[i],b=(i<11?terms[i+1]:findTermJST(y+1)[0]);if(cur>=a&&cur<b){idx=i;break;}}return (idx<0)?11:idx;}catch(e){var arr=[],i;for(i=0;i<12;i++){var t=meanSetu[i],yy=y,mm=t.m;if(mm==1)yy=y+1;arr.push({y:yy,m:mm,d:t.d,idx:i});}var v=y*10000+m*100+d;for(i=0;i<12;i++){var a=arr[i],tv=a.y*10000+a.m*100+a.d;if(v<tv)return (i+11)%12;}return 11;}}
+  var idx=(document.getElementById("setu").value==="const")?autoIndex(): (function(){var arr=[],i;for(i=0;i<12;i++){var t=meanSetu[i],yy=y,mm=t.m;if(mm==1)yy=y+1;arr.push({y:yy,m:mm,d:t.d,idx:i});}var v=y*10000+m*100+d;for(i=0;i<12;i++){var a=arr[i],tv=a.y*10000+a.m*100+a.d;if(v<tv)return (i+11)%12;}return 11;})();
+  var br=MB[idx]; var map={"甲":"丙","己":"丙","乙":"戊","庚":"戊","丙":"庚","辛":"庚","丁":"壬","壬":"壬","戊":"甲","癸":"甲"}, st=map[ys], si=S.indexOf(st);
   return [S[(si+idx)%10], br];
 }
 
-// ===== 数秘（運命数など） =====
+// ===== 数秘 =====
 function pad(n){return (n<10?"0":"")+n;}
-function reduceNum(n){n=(""+n).replace(/\D/g,""); var s=0; for(var i=0;i<n.length;i++) s+=(+n[i]); if(s===11||s===22||s===33) return s; while(s>9){var t=0; var str=""+s; for(var j=0;j<str.length;j++) t+=(+str[j]); if(t===11||t===22||t===33){s=t;break;} s=t;} return s;}
+function reduceNum(n){n=(""+n).replace(/\D/g,"");var s=0;for(var i=0;i<n.length;i++) s+=(+n[i]);if(s===11||s===22||s===33) return s;while(s>9){var t=0;var str=""+s;for(var j=0;j<str.length;j++) t+=(+str[j]);if(t===11||t===22||t===33){s=t;break;}s=t;}return s;}
 function lifePath(y,m,d){return reduceNum(""+y+pad(m)+pad(d));}
+function birthdayNum(d){return (d>=10)?reduceNum(""+d):d;}
+function personalYear(m,d,curY){return reduceNum(reduceNum(""+curY)+reduceNum(""+m)+reduceNum(""+d));}
+function personalMonth(py, calMonth){return reduceNum(py + calMonth);}
 
-// 数秘 相性スコア表（要点のみ）
-var NCbase={
-  1:{1:70,2:78,3:85,4:76,5:82,6:74,7:80,8:88,9:75,11:86,22:84,33:80},
-  2:{1:78,2:72,3:77,4:82,5:74,6:86,7:80,8:70,9:83,11:85,22:76,33:84},
-  3:{1:85,2:77,3:75,4:72,5:88,6:80,7:78,8:79,9:84,11:86,22:78,33:90},
-  4:{1:76,2:82,3:72,4:74,5:70,6:80,7:85,8:86,9:73,11:78,22:88,33:76},
-  5:{1:82,2:74,3:88,4:70,5:76,6:73,7:80,8:78,9:84,11:86,22:80,33:82},
-  6:{1:74,2:86,3:80,4:80,5:73,6:78,7:76,8:82,9:88,11:84,22:80,33:86},
-  7:{1:80,2:80,3:78,4:85,5:80,6:76,7:74,8:82,9:79,11:88,22:84,33:78},
-  8:{1:88,2:70,3:79,4:86,5:78,6:82,7:82,8:76,9:80,11:84,22:90,33:80},
-  9:{1:75,2:83,3:84,4:73,5:84,6:88,7:79,8:80,9:76,11:86,22:82,33:88},
-  11:{1:86,2:85,3:86,4:78,5:86,6:84,7:88,8:84,9:86,11:82,22:86,33:90},
-  22:{1:84,2:76,3:78,4:88,5:80,6:80,7:84,8:90,9:82,11:86,22:84,33:86},
-  33:{1:80,2:84,3:90,4:76,5:82,6:86,7:78,8:80,9:88,11:90,22:86,33:84}
-};
+// 相性（数秘ベーススコア一部）
+var NCbase={1:{1:70,2:78,3:85,4:76,5:82,6:74,7:80,8:88,9:75,11:86,22:84,33:80},2:{1:78,2:72,3:77,4:82,5:74,6:86,7:80,8:70,9:83,11:85,22:76,33:84},3:{1:85,2:77,3:75,4:72,5:88,6:80,7:78,8:79,9:84,11:86,22:78,33:90},4:{1:76,2:82,3:72,4:74,5:70,6:80,7:85,8:86,9:73,11:78,22:88,33:76},5:{1:82,2:74,3:88,4:70,5:76,6:73,7:80,8:78,9:84,11:86,22:80,33:82},6:{1:74,2:86,3:80,4:80,5:73,6:78,7:76,8:82,9:88,11:84,22:80,33:86},7:{1:80,2:80,3:78,4:85,5:80,6:76,7:74,8:82,9:79,11:88,22:84,33:78},8:{1:88,2:70,3:79,4:86,5:78,6:82,7:82,8:76,9:80,11:84,22:90,33:80},9:{1:75,2:83,3:84,4:73,5:84,6:88,7:79,8:80,9:76,11:86,22:82,33:88},11:{1:86,2:85,3:86,4:78,5:86,6:84,7:88,8:84,9:86,11:82,22:86,33:90},22:{1:84,2:76,3:78,4:88,5:80,6:80,7:84,8:90,9:82,11:86,22:84,33:86},33:{1:80,2:84,3:90,4:76,5:82,6:86,7:78,8:80,9:88,11:90,22:86,33:84}};
 
-// ===== メイン処理 =====
+// ========== 鑑定 ==========
 function run(){
   // 入力
   var y=+document.getElementById("y").value, m=+document.getElementById("m").value, d=+document.getElementById("d").value;
@@ -225,20 +180,16 @@ function run(){
   var mp=monthP(y,m,d,ys), ms=mp[0], mb=mp[1];
   var hb=hourB(hh), hs=hourS(ds,hb);
 
-  // 命式表
+  // 命式
   document.getElementById("ms").innerHTML=[
-    '年：<b>'+ys+yb+'</b>（育ち/家）',
-    '月：<b>'+ms+mb+'</b>（社会/仕事）',
-    '日：<b>'+ds+db+'</b>（あなたの中心）',
-    '時：<b>'+hs+hb+'</b>（考え/将来）'
+    '年：<b>'+ys+yb+'</b>（育ち/家）','月：<b>'+ms+mb+'</b>（社会/仕事）','日：<b>'+ds+db+'</b>（中心）','時：<b>'+hs+hb+'</b>（考え/将来）'
   ].map(x=>'<div class="chip">'+x+'</div>').join('');
 
-  var rows=[["年柱",ys,yb,"家の雰囲気"],["月柱",ms,mb,"社会での顔"],["日柱",ds,db,"性格の核心"],["時柱",hs,hb,"考え/将来像"]].map(function(p){
-    var tg=tenGod(ds,p[1]), easy={
-      "比肩":"自立/自分軸","劫財":"仲間で突破","食神":"楽しく表現","傷官":"改善/分析","偏財":"ご縁・行動","正財":"約束・信頼","偏官":"挑戦で伸びる","正官":"役割・評価","偏印":"ひらめき","印綬":"学びで強化"
-    }[tg]||"";
-    return '<tr><th>'+p[0]+'</th><td>'+p[1]+'</td><td>'+p[2]+'</td><td>'+tg+'</td><td>'+(TGtxt[tg]||"")+'</td><td class="note">'+p[3]+'｜'+easy+'</td></tr>';
-  }).join('');
+  var TGtxt={"比肩":"自分でやる力","劫財":"仲間と突破","食神":"表現と楽しさ","傷官":"改善と分析","偏財":"ご縁とチャンス","正財":"約束と信頼","偏官":"挑戦と行動","正官":"役割と評価","偏印":"ひらめき","印綬":"学びと理解"};
+  function row(p){var tg=tenGod(ds,p[1]), easy={
+    "比肩":"自立/自分軸","劫財":"仲間で突破","食神":"楽しく表現","傷官":"改善/分析","偏財":"ご縁・行動","正財":"約束・信頼","偏官":"挑戦で伸びる","正官":"役割・評価","偏印":"ひらめき","印綬":"学びで強化"
+  }[tg]||"";return '<tr><th>'+p[0]+'</th><td>'+p[1]+'</td><td>'+p[2]+'</td><td>'+tg+'</td><td>'+(TGtxt[tg]||"")+'</td><td class="small">'+p[3]+'｜'+easy+'</td></tr>';}
+  var rows=[["年柱",ys,yb,"家の雰囲気"],["月柱",ms,mb,"社会での顔"],["日柱",ds,db,"性格の核心"],["時柱",hs,hb,"考え/将来像"]].map(row).join('');
   document.getElementById("tbl").innerHTML='<table><thead><tr><th>柱</th><th>天干</th><th>地支</th><th>通変星</th><th>意味</th><th>やさしい読み方</th></tr></thead><tbody>'+rows+'</tbody></table>';
 
   // 五行（蔵干込み）
@@ -251,8 +202,8 @@ function run(){
   document.getElementById("fftags").innerHTML='<span class="badge">強：'+ord[0]+'</span><span class="badge">弱：'+ord[4]+'</span>';
 
   var meaning={
-    "木":{mean:"成長・学び・やさしさ", strong:"育成/発芽の場を増やす", weak:"朝散歩・読書で“伸びる習慣”"},
-    "火":{mean:"情熱・発信・元気", strong:"声を出す/伝えるを増やす", weak:"体を温める・軽運動"},
+    "木":{mean:"成長・学び・やさしさ", strong:"育成/アイデアを外へ", weak:"朝散歩・読書で“伸びる”"},
+    "火":{mean:"情熱・発信・元気", strong:"声に出す/伝える", weak:"体を温める・軽運動"},
     "土":{mean:"安定・計画・支える", strong:"段取り/継続で信頼UP", weak:"小さなルーティンで土台づくり"},
     "金":{mean:"判断・整える・磨く", strong:"ルール/品質で強み", weak:"片付け/情報整理で磨く"},
     "水":{mean:"考える・情報・流れ", strong:"分析/IT/伝える◎", weak:"メモ/対話/散歩で循環"}
@@ -264,73 +215,137 @@ function run(){
     return '<div class="tag">'+k+'：'+meaning[k].mean+' ／ <b>'+lv(v)+'</b> → '+tip+'</div>';
   }).join('');
 
-  // 相性（四柱＋数秘・アドバイス強化）
+  // ====== 総合リーディング ======
+  // 通変星カウント（あなた視点）
+  var tgAll={}, pillarsGan=[ys,ms,hs]; pillarsGan.forEach(g=>{var t=tenGod(ds,g); if(t) tgAll[t]=(tgAll[t]||0)+1;}); (ZM[db]||[]).forEach(zg=>{var t=tenGod(ds,zg); if(t) tgAll[t]=(tgAll[t]||0)+1;});
+  var topTG=Object.keys(tgAll).sort((a,b)=>(tgAll[b]||0)-(tgAll[a]||0));
+
+  // 性格・才能・人間関係
+  var traits=[];
+  if(topTG[0]) traits.push('性格の核：<b>'+topTG[0]+'</b>（'+{"比肩":"自分軸で進む","劫財":"仲間と動く","食神":"楽しく表現","傷官":"細部を整える","偏財":"ご縁をつかむ","正財":"約束を守る","偏官":"挑戦で伸びる","正官":"役割で信頼","偏印":"ひらめき多め","印綬":"学んで広げる"}[topTG[0]]+'）');
+  if(topTG[1]) traits.push('才能の伸ばし方：<b>'+topTG[1]+'</b>（'+{"比肩":"自分で決める時間","劫財":"人に頼る/一緒に","食神":"遊び心を入れる","傷官":"改善リスト化","偏財":"外へ出る/行動","正財":"締切と約束","偏官":"小さく挑戦","正官":"役割を明確化","偏印":"直感で試す","印綬":"情報を整理"}[topTG[1]]+'）');
+  traits.push('人間関係のコツ：<b>'+(SE[ds]===SE[ms]?"似た強みを褒め合う":"違いは“役割分担”に変える")+'</b>');
+  document.getElementById("traits").innerHTML=traits.map(x=>'<div class="tag">'+x+'</div>').join('');
+
+  // 恋愛観（四柱＋数秘）
+  var lp=lifePath(y,m,d), bd=birthdayNum(d), py=personalYear(m,d,new Date().getFullYear());
+  var loveLines=[];
+  loveLines.push('数秘：運命数<b>'+lp+'</b> → '+({1:"主導型。相手の気持ちを聞くと◎",2:"寄り添い型。合わせすぎ注意",3:"楽しい恋◎。飽き対策に計画を",4:"安定重視。安心感の演出◎",5:"刺激好き。自由とルールの両立",6:"家族的。抱え込み注意",7:"一人時間必須。理解者◎",8:"頼れる。強引さ注意",9:"やさしい。境界線を忘れず",11:"心の通い合い重視",22:"大きな目標で絆UP",33:"包容力大。自己ケアも"})[lp]);
+  // 桃花
+  var peach = PEACH_BY_DAY[db]; if(peach) loveLines.push('四柱：あなたの日支<b>'+db+'</b>の桃花は<b>'+peach+'</b>。その月やその干支の人は出会い運UP。');
+  document.getElementById("loveView").innerHTML = loveLines.map(x=>'<div class="note" style="margin:4px 0">'+x+'</div>').join("");
+
+  // おすすめのビジネス（五行＆数秘）
+  var strong=ord[0], weak=ord[4];
+  var bizMap={"木":"教育/育成/企画","火":"広報/販売/エンタメ","土":"管理/総務/品質","金":"法務/財務/審査/デザイン","水":"IT/情報/研究/伝達"};
+  var lpJob={(1:"起業/営業/企画/管理"),2:"人事/秘書/接客/ケア",3:"デザイン/広報/教育",4:"経理/行政/建築/品質",5:"営業/旅行/マーケ/通訳",6:"医療/福祉/美容/教育",7:"研究/分析/開発/コンサル",8:"管理職/不動産/金融",9:"教育/福祉/企画/広報",11:"アート/表現/カウンセリング",22:"経営/社会事業/建設/仕組み化",33:"教育/ケア/表現/コミュニティ"};
+  document.getElementById("business").innerHTML=[
+    '五行の強み：<b>'+strong+'</b> → '+bizMap[strong],
+    '数秘の適職：<b>'+lp+'</b> → '+lpJob[lp],
+    '弱み（育てる）：<b>'+weak+'</b> → 小さな習慣で補強'
+  ].map(x=>'<div class="note" style="margin:4px 0">'+x+'</div>').join("");
+
+  // 長所・短所
+  var strengths=[
+    '長所：<b>'+strong+'</b>の良さ（'+{"木":"優しさ・成長力","火":"情熱・発信力","土":"安定・段取り","金":"判断・整える力","水":"分析・伝達"}[strong]+'）を前へ',
+    '短所：<b>'+weak+'</b>が足りやすい → '+
+      {"木":"朝散歩/学びを足す","火":"体を温め声に出す","土":"小さなルール作り","金":"片付け/情報整理","水":"メモ/対話で流れ作り"}[weak]
+  ];
+  // 通変星由来の注意
+  if(topTG[0]==="傷官") strengths.push('注意：批判が強くなりやすい → 時間を区切って“改善→実行”へ。');
+  if(topTG[0]==="偏官") strengths.push('注意：突っ走りすぎ注意 → 小さく挑戦→締切で整える。');
+  if(topTG[0]==="正財") strengths.push('注意：抱え込み → 役割分担と締切共有で楽に。');
+  document.getElementById("strengths").innerHTML=strengths.map(x=>'<div class="note" style="margin:4px 0">'+x+'</div>').join("");
+
+  // ===== 相性ボタン（既存ロジックを保持） =====
   document.getElementById("compatBtn").onclick=function(){
     var y2=+document.getElementById("py2").value, m2=+document.getElementById("pm2").value, d2=+document.getElementById("pd2").value;
     var hm2=document.getElementById("phm2").value||"12:00", t2=parseHM(hm2), hh2=t2[0];
     if(!(y2>0&&m2>=1&&m2<=12&&d2>=1&&d2<=31)){document.getElementById("compatOut").innerHTML="<div class='err' style='display:block'>相手の生年月日を正しく入れてね</div>"; return;}
-
     var dp2=dayP(y2,m2,d2), ds2=dp2[0], db2=dp2[1]; var hb2=hourB(hh2), hs2=hourS(ds2,hb2);
-
     function gScore(a,b){var s=50,ea=SE[a],eb=SE[b]; if(GEN[ea]===eb)s+=12; if(GEN[eb]===ea)s+=12; if(CTL[ea]===eb)s-=14; if(CTL[eb]===ea)s-=14; if(SY[a]===SY[b])s+=6; else s-=4;return Math.max(0,Math.min(100,s));}
     var H={ "六合":HEX, "冲":CHONG, "害":[["子","未"],["丑","午"],["寅","巳"],["卯","辰"],["申","亥"],["酉","戌"]] };
     function zScore(a,b){var s=50; if(inPairs(H["六合"],a,b))s+=20; if(inPairs(H["冲"],a,b))s-=18; if(inPairs(H["害"],a,b))s-=8; return Math.max(0,Math.min(100,s));}
     var siJuScore=Math.round(gScore(ds,ds2)*0.6 + zScore(db,db2)*0.4);
-
-    var lp1=lifePath(y,m,d), lp2=lifePath(y2,m2,d2);
-    var numScore=(NCbase[lp1]&&NCbase[lp1][lp2])||75;
-
-    // 用途別総合
+    var lp1=lifePath(y,m,d), lp2=lifePath(y2,m2,d2), numScore=(NCbase[lp1]&&NCbase[lp1][lp2])||75;
     var loveScore=Math.round(siJuScore*0.65 + numScore*0.35);
     var friendScore=Math.round(siJuScore*0.5 + numScore*0.5);
     var roleBoost=0; if(GEN[SE[ds]]===SE[ds2]) roleBoost+=4; if(CTL[SE[ds]]===SE[ds2]) roleBoost+=3;
     var bizScore=Math.max(0,Math.min(100, Math.round(siJuScore*0.6 + numScore*0.4 + roleBoost)));
-
     function face(s){return s>=86?"◎":(s>=80?"◯":(s>=74?"△":"▲"));}
-
-    // —— アドバイス（用途別）——
-    function loveAdvice(s){
-      var a=[];
-      if(s<75){a.push("結論から話さず“気持ち→理由→提案”の順で。");}
-      a.push(SE[ds]===SE[ds2]?"似た強みを褒め合うと最強。":"違いは役割分担に変えると噛み合う。");
-      if(inPairs(HEX, db, db2)) a.push("“六合”でご縁が進みやすい：会う回数を増やす。");
-      if(inPairs(CHONG, db, db2)) a.push("主張がぶつかる：共通のゴールを先に決めてから会話。");
-      return a.join(" ");
-    }
-    function friendAdvice(s){
-      var a=[];
-      if(s<75) a.push("連絡頻度（週1/隔週）を先に合意。");
-      a.push( (CTL[SE[ds]]===SE[ds2]||CTL[SE[ds2]]===SE[ds]) ? "担当を分ける（企画/まとめ/連絡）。" : "共通の趣味時間を固定すると長続き。");
-      return a.join(" ");
-    }
-    function bizAdvice(s){
-      var a=[];
-      if(GEN[SE[ds]]===SE[ds2]) a.push("あなた→相手を育てる関係：コーチ役が吉。");
-      if(CTL[SE[ds]]===SE[ds2]) a.push("あなた→相手を管理：KPI/締切をあなた側で設計。");
-      if(CTL[SE[ds2]]===SE[ds]) a.push("相手→あなたを管理：締切係を相手に。");
-      if(s<75) a.push("会議は“決める人→決める順→期限”を先に宣言。");
-      a.push("議事は3行要約＋次の一手を明文化。");
-      return a.join(" ");
-    }
-
-    var html='';
-    html+='<div class="kv"><div class="chip">あなた：<b>'+ds+db+'</b> / 運命数<b>'+lp1+'</b></div><div class="chip">相手：<b>'+ds2+db2+'</b> / 運命数<b>'+lp2+'</b></div></div>';
-    html+='<div class="hr"></div>';
-    html+='<div><b>四柱の相性</b>：'+siJuScore+'/100　<b>数秘の相性</b>：'+numScore+'/100</div>';
-    html+='<div class="hr"></div>';
+    function loveAdvice(s){var a=[]; if(s<75)a.push("“気持ち→理由→提案”の順で話す。"); if(inPairs(HEX, db, db2))a.push("“六合”で会う回数を増やす。"); if(inPairs(CHONG, db, db2))a.push("先に共通ゴールを決めてから話す。"); return a.join(" ");}
+    function friendAdvice(s){var a=[]; if(s<75)a.push("連絡頻度（週1/隔週）を合意。"); a.push((CTL[SE[ds]]===SE[ds2]||CTL[SE[ds2]]===SE[ds])?"担当を分ける（企画/まとめ/連絡）。":"共通の趣味時間を固定。"); return a.join(" ");}
+    function bizAdvice(s){var a=[]; if(GEN[SE[ds]]===SE[ds2])a.push("あなた→相手を育てる：コーチ役。"); if(CTL[SE[ds]]===SE[ds2])a.push("あなた→相手を管理：KPI/締切設計。"); if(CTL[SE[ds2]]===SE[ds])a.push("相手→あなたを管理：締切係を相手に。"); if(s<75)a.push("会議は“決める人→順→期限”を最初に宣言。"); return a.join(" ");}
+    var html=''; html+='<div class="kv"><div class="chip">あなた：<b>'+ds+db+'</b> / 運命数<b>'+lp1+'</b></div><div class="chip">相手：<b>'+ds2+db2+'</b> / 運命数<b>'+lp2+'</b></div></div><div class="hr"></div>';
+    html+='<div><b>四柱の相性</b>：'+siJuScore+'/100　<b>数秘の相性</b>：'+numScore+'/100</div><div class="hr"></div>';
     html+='<div><b>総合（恋愛）</b>：'+loveScore+'/100 '+face(loveScore)+'<br><span class="small">'+loveAdvice(loveScore)+'</span></div>';
     html+='<div style="margin-top:6px"><b>総合（友情）</b>：'+friendScore+'/100 '+face(friendScore)+'<br><span class="small">'+friendAdvice(friendScore)+'</span></div>';
     html+='<div style="margin-top:6px"><b>総合（ビジネス）</b>：'+bizScore+'/100 '+face(bizScore)+'<br><span class="small">'+bizAdvice(bizScore)+'</span></div>';
     document.getElementById("compatOut").innerHTML=html;
   };
+
+  // ====== 時期判定（これから12か月） ======
+  // 数秘の良月ルール
+  function bestNumMonths(kind, py){ // kind: 'love','meet','job','ind'
+    var sets={love:[2,3,6], meet:[3,5], job:[1,5,8], ind:[1,8]};
+    return sets[kind||'love']||[2,3,6];
+  }
+  // 四柱の良月ルール（要点版）
+  // 恋愛/結婚：財（自分が制する要素）＝ CTL[me] の五行の月 ＋ 桃花月
+  // 転職/独立：官（自分を制する要素）＝ controlsMe の五行の月（転職）／財・比肩強化の月（独立）
+  var meE=SE[ds], wealthE=CTL[meE]; // 自分が制する＝財
+  var controlsMeE=(function(){for(var k in CTL){if(CTL[k]===meE)return k;}return null;})(); // 自分を制する＝官
+  function monthBranch(y, m, d){ return monthP(y,m,d,yearP(y,m,d)[0])[1]; }
+
+  // 次の12か月の月支・個人月
+  var today=new Date(), startY=today.getFullYear(), startM=today.getMonth()+1;
+  var basePY=personalYear(m,d,startY);
+  var cells=[], legend=[];
+  for(var i=0;i<12;i++){
+    var Y = startY + Math.floor((startM-1+i)/12);
+    var M = ((startM-1+i)%12)+1;
+    // 四柱：その月の月支と五行
+    var br = monthBranch(Y,M,15); // 月央で近似
+    var brE = BR_E[br];
+    // 数秘：個人年は年替わり、個人月は (PY + 月)
+    var curPY = personalYear(m,d,Y);
+    var pm = personalMonth(curPY, M);
+
+    // 種別ごとのヒット
+    var numLove = bestNumMonths('love',curPY).indexOf(pm)>=0;
+    var numMeet = bestNumMonths('meet',curPY).indexOf(pm)>=0;
+    var numJob  = bestNumMonths('job',curPY).indexOf(pm)>=0;
+    var numInd  = bestNumMonths('ind',curPY).indexOf(pm)>=0;
+
+    var siLove = (brE===wealthE) || (br===PEACH_BY_DAY[db]);
+    var siJob  = (brE===controlsMeE);
+    var siInd  = (brE===wealthE) || (SE[ms]===meE); // 財or自分強化
+
+    function cls(b1,b2){return b1&&b2?"hitBoth":(b1?"hitNum":(b2?"hitSi":""));}
+
+    var tip=[];
+    if(numLove||siLove) tip.push("恋/結婚");
+    if(numMeet||siMeet) tip.push("出会い");
+    if(numJob ||siJob ) tip.push("転職");
+    if(numInd ||siInd ) tip.push("独立");
+
+    var divCls=cls((numLove||numMeet||numJob||numInd),(siLove||siJob||siInd));
+    var label = Y+"年"+M+"月（"+br+"）";
+    var detail = [];
+    if(numLove||siLove) detail.push("恋愛◎");
+    if(numMeet||siMeet) detail.push("出会い◎");
+    if(numJob||siJob)   detail.push("転職◎");
+    if(numInd||siInd)   detail.push("独立◎");
+    if(detail.length===0) detail.push("様子見");
+
+    cells.push('<div class="km '+divCls+'"><b>'+label+'</b>'+detail.join("・")+'</div>');
+  }
+  document.getElementById("timing").innerHTML=cells.join('');
+  document.getElementById("timingLegend").innerHTML="※ “恋/結婚”は数秘の良月（2/3/6）＋ 四柱の財の月/桃花月、“転職”は数秘（1/5/8）＋ 四柱の官の月、“独立”は数秘（1/8）＋ 四柱の財/自分強化の月で判定。";
 }
 
 // 初期化
-function init(){
-  document.getElementById("run").addEventListener("click",run);
-  document.getElementById("compatBtn").addEventListener("click",function(){}); // 実処理は run 内
-  run();
-}
+function init(){ document.getElementById("run").addEventListener("click",run); document.getElementById("compatBtn").addEventListener("click",function(){}); run(); }
 document.addEventListener("DOMContentLoaded",init);
 </script>
 </body></html>
