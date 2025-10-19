@@ -1,1 +1,155 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Jyotish Pro｜あなたの本質と恋愛運</title>
+  <style>
+    body {
+      background: linear-gradient(180deg, #0b132b, #1c2541 70%);
+      color: #e8effc;
+      font-family: "Noto Sans JP", sans-serif;
+      margin: 0;
+      padding: 0;
+      line-height: 1.8;
+    }
+    header {
+      text-align: center;
+      padding: 60px 20px 40px;
+      border-bottom: 1px solid #2f3f66;
+    }
+    header h1 {
+      font-size: 28px;
+      color: #66b2ff;
+      letter-spacing: 1px;
+      margin-bottom: 10px;
+    }
+    header p {
+      color: #a8caff;
+      font-size: 14px;
+      margin: 0;
+    }
+    main {
+      max-width: 750px;
+      margin: 50px auto;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid #2c3e50;
+      border-radius: 16px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+      padding: 40px 50px;
+    }
+    h2 {
+      color: #a8caff;
+      border-left: 5px solid #69b3ff;
+      padding-left: 12px;
+      font-size: 20px;
+      margin-bottom: 10px;
+    }
+    p {
+      margin-top: 5px;
+      margin-bottom: 18px;
+    }
+    ul { padding-left: 24px; }
+    li { margin-bottom: 6px; }
+    .highlight {
+      color: #66b2ff;
+      font-weight: bold;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      color: #e8effc;
+      font-size: 15px;
+    }
+    th, td {
+      border-bottom: 1px solid #2f3f66;
+      padding: 8px 6px;
+      text-align: left;
+    }
+    th {
+      color: #a8caff;
+      width: 35%;
+    }
+    footer {
+      text-align: center;
+      font-size: 13px;
+      color: #a8caff;
+      padding: 30px 0 50px;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Jyotish Pro 鑑定書</h1>
+    <p>インド占星術 × プロ仕様リーディング</p>
+  </header>
 
+  <main>
+    <section>
+      <h2>あなたの本質と才能</h2>
+      <p>あなたは冷静な観察力と判断力を備えています。人の本音や状況の裏を読み取る洞察に長け、感情よりも「正確さ」と「誠実さ」を重んじるタイプです。</p>
+      <p>分析力が非常に高く、物事を体系立てて整理するのが得意。多くの人が混乱する中でもあなたは構造を見抜き、改善策を導けます。</p>
+      <p>才能は <span class="highlight">戦略・教育・交渉・カウンセリング・リーダー職</span> で最も発揮されます。</p>
+    </section>
+
+    <section>
+      <h2>長所</h2>
+      <ul>
+        <li>物事を冷静に判断できる</li>
+        <li>信頼を積み上げる誠実さ</li>
+        <li>努力を継続する粘り強さ</li>
+        <li>理論的な説明と説得力</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>短所</h2>
+      <ul>
+        <li>完璧を求めすぎて疲れやすい</li>
+        <li>感情表現が控えめで誤解されやすい</li>
+        <li>他人に頼るのが苦手で抱え込みやすい</li>
+      </ul>
+    </section>
+
+    <section>
+      <h2>あなたが惹かれるタイプ</h2>
+      <p>あなたは知的で誠実な人、そして一貫性のある人に惹かれます。見た目よりも「考え方の相性」を重視する傾向があり、派手さよりも深い信頼を築ける関係を求めます。</p>
+      <p>感情的に不安定な人より、穏やかで思いやりのある相手に安心を感じます。  
+      また、あなたに正直に意見を言える人には自然と心を開きます。</p>
+    </section>
+
+    <section>
+      <h2>恋愛傾向</h2>
+      <p>恋愛においても真面目で慎重。時間をかけて関係を育てるタイプです。  
+      一方で、理屈で整理しすぎると情熱が伝わりにくくなるため、  
+      「好き」や「安心する」といったシンプルな感情を素直に伝えると関係が深まります。</p>
+      <p>あなたの恋は、安定と尊敬の上に成り立ちます。  
+      相手を信じること、そして自分を信じること。  
+      それが恋愛運を大きく上げる鍵です。</p>
+    </section>
+
+    <section>
+      <h2>恋愛へのアドバイス</h2>
+      <p>あなたの魅力は「冷静さ」と「誠実さ」。ただし恋愛では、時に正しさよりも“温度”が大事です。  
+      感情を理屈で説明しようとせず、<span class="highlight">感じたことを短い言葉で伝える</span>練習をしましょう。</p>
+      <p>相手を変えようとするより、「相手のペースに一度合わせてみる」だけで関係は驚くほどスムーズになります。  
+      あなたの優しさは理屈ではなく、日常の一言にこそ宿ります。</p>
+      <p>焦らず、自分の誠実さを大切に進めば、愛され方はより深く・長くなります。</p>
+    </section>
+
+    <section>
+      <h2>3年間の運勢（主要テーマ）</h2>
+      <table>
+        <tr><th>2025年</th><td>新しい縁と仕事の変化が同時に動く年。過去の学びが形になります。</td></tr>
+        <tr><th>2026年</th><td>感情の整理と信頼関係の再構築。恋愛も仕事も「相手を見る目」が磨かれます。</td></tr>
+        <tr><th>2027年</th><td>長期計画を実行する年。特に起業・転職・引越しに追い風。</td></tr>
+      </table>
+    </section>
+  </main>
+
+  <footer>
+    © 2025 Jyotish Pro — Professional Vedic Astrology
+  </footer>
+</body>
+</html>
