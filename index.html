@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>命・運・卜｜数秘＋宿曜＋九星＋風水（やさしい日本語・統合完全版）</title>
+<title>命・運・卜｜数秘＋宿曜＋九星＋風水（やさしい日本語・統合完全版｜九星修正版）</title>
 <style>
   :root{
     --bg:#0a0f13;--panel:#111826;--ink:#eaf1ff;--muted:#9fb1cf;
@@ -321,15 +321,37 @@ const REL_DETAIL={
         love:["初動：共通の学びや習い事","距離感：期待値は低めに設定","連絡：『今日の一行』で十分","NG：白黒即断","長続き：3ヶ月ごとの小目標→お祝い"]}
 };
 
-/* ===== 九星（βオート方位） ===== */
-const KUSEI=["九紫火星","一白水星","二黒土星","三碧木星","四緑木星","五黄土星","六白金星","七赤金星","八白土星"];
-function honmei(utc){
-  const y=(utc.getUTCMonth()<1||(utc.getUTCMonth()==1&&utc.getUTCDate()<4))?utc.getUTCFullYear()-1:utc.getUTCFullYear();
-  const idx=((y-1900)%9+9)%9; return KUSEI[idx];
+/* ===== 九星（修正版：本命星＆盤の中宮） ===== */
+const KUSEI=["一白水星","二黒土星","三碧木星","四緑木星","五黄土星","六白金星","七赤金星","八白土星","九紫火星"];
+
+/* 2024年＝三碧中宮 をアンカーにした年中宮（Center Year） */
+function centerYear(year){
+  const seq=["三碧木星","二黒土星","一白水星","九紫火星","八白土星","七赤金星","六白金星","五黄土星","四緑木星"];
+  const offset=year-2024;
+  const idx=( (0 + ((offset%9)+9)%9) )%9; // 2024->index0=三碧
+  return seq[idx];
 }
-function centerYear(year){ const idx=((year-1900)%9+9)%9; return KUSEI[idx]; }
-function centerMonth(year,month){ const base=((year*12+month)-1900*12)%9; return KUSEI[(base+9)%9]; }
-function centerDay(y,m,d){ const base=(Math.floor((Date.UTC(y,m-1,d)-Date.UTC(1900,0,1))/86400000))%9; return KUSEI[(base+9)%9]; }
+/* 便宜上：月盤・日盤も同ローテの簡易β */
+function centerMonth(year,month){
+  const baseOrder=["三碧木星","二黒土星","一白水星","九紫火星","八白土星","七赤金星","六白金星","五黄土星","四緑木星"];
+  // 2024年1月を三碧起点として月を進める簡易モデル
+  const monthsSince=(year-2024)*12+(month-1);
+  const idx=((0+monthsSince)%9+9)%9;
+  return baseOrder[idx];
+}
+function centerDay(y,m,d){
+  const baseOrder=["三碧木星","二黒土星","一白水星","九紫火星","八白土星","七赤金星","六白金星","五黄土星","四緑木星"];
+  const daysSince=Math.floor((Date.UTC(y,m-1,d)-Date.UTC(2024,0,1))/86400000);
+  const idx=((0+daysSince)%9+9)%9;
+  return baseOrder[idx];
+}
+
+/* 本命星：立春（2/4）前は前年扱い → その年の中宮が本命星 */
+function honmei(utc){
+  const y= (utc.getUTCMonth()<1 || (utc.getUTCMonth()==1 && utc.getUTCDate()<4))
+            ? utc.getUTCFullYear()-1 : utc.getUTCFullYear();
+  return centerYear(y);
+}
 function simpleHouiAdvice(star){
   return { good:["東","東南","北"], care:["西北","西","南"],
     tip:`${star}は「玄関・水回り・寝室」を整えると底上げ。引越・旅は吉方を優先。` };
@@ -350,7 +372,12 @@ const SHUKU_TO_WUXING={
   "觜火猴":"金","参水猿":"水","井木犴":"木","鬼金羊":"金","柳土獐":"土","星日馬":"火","張月鹿":"火","翼火蛇":"火","軫水蚓":"水"
 };
 const PMONTH_ACTION={
-  1:{room:"玄関",why:"新しい縁の入口を整える",act:["靴を3足までにする","ドア周りを水拭き→乾拭き","表札/呼鈴を磨く"]},
+  1:{room:"玄関",why:"新しい縁の入口を整える",act:[
+    /* ←← ここを汎用化（職種問わず）*/
+    "新しい“試し”を1つ作る（小さな改善・サービス・手順でもOK）",
+    "小さく始めて3人に試して感想をもらう（無料/割引/テスト版）",
+    "もらった感想を1つだけ採用し、翌週に反映する"
+  ]},
   2:{room:"ダイニング/寝室",why:"人との距離感を整える",act:["二人席を作る","寝具カバー洗濯/新調","ペアマグを置く"]},
   3:{room:"リビング/デスク",why:"発信力を上げる",act:["照明を1段明るく","作品/ポスターを飾る","配線を束ねる"]},
   4:{room:"収納/クローゼット",why:"基盤＝在庫と導線",act:["1in1out","床置きゼロ","ラベルで定位置化"]},
@@ -408,7 +435,6 @@ function fengShuiAdviceText(lp, shukuName, star, pmonth, todayDirHints){
 /* ===== 説明テキスト（やさしい言葉） ===== */
 function MeiText(lp,shuku){
   const L=LP_PROFILE[lp], S=SHUKU_PROFILE[shuku]||{};
-  // 性格の柱・感性のクセを子どもでも分かる表現に
   return `
   <p class="lead"><span class="hint">結論：</span>あなたは<strong>${L.t}</strong>タイプ。心のクセは「${S.kw||"ようすを見る"}」。宿曜は<strong>${shuku}</strong>（${S.type||"中庸"}）。</p>
   <ul>
@@ -440,7 +466,11 @@ function UnText(by,bm,bd){
 }
 function BokuText(pmonth){
   const plan={
-    1:{lead:"新しい一歩。まず“試作”。",work:["新メニューを1つ作る","仮の値段で3人に試す"],love:["短時間のデートを先に決める","告白は『まず週1で会おう』"],money:["小さく道具に投資"],health:["就寝を15分早める"]},
+    1:{lead:"新しい一歩。まず“試作”。",work:[
+      /* ←← ここを汎用化（職種フリー） */
+      "新しい“試し”を1つ作る（小さな改善・サービス・台本・資料など何でもOK）",
+      "小さく始めて3人に試して感想を集める（無料/割引/テスト版）"
+    ],love:["短時間のデートを先に決める","告白は『まず週1で会おう』"],money:["小さく道具に投資"],health:["就寝を15分早める"]},
     2:{lead:"二人三脚。人と組む。",work:["相談相手を1人決める","ペア作業を週1回"],love:["共通作業デートを1回","聞き役7割・自分3割"],money:["固定費の見直し"],health:["肩首ストレッチ3分"]},
     3:{lead:"発信強化。ことばにする。",work:["週3本SNS/ブログ","事例写真を3枚追加"],love:["褒め＋次の提案を一言で","ボイス/短文で軽く"],money:["副収入のタネを1つ"],health:["昼に15分日光浴"]},
     4:{lead:"土台づくり。整える。",work:["テンプレ/台本作成","在庫/原価表を更新"],love:["長時間デート控えめ","生活リズムを合わせる"],money:["貯金の自動化を一段上げる"],health:["検診/歯科など予約"]},
@@ -593,7 +623,7 @@ document.getElementById("run").addEventListener("click", ()=>{
     document.getElementById("compat").innerHTML=`<p class="muted">相手の生年月日を入れると、恋愛に特化した詳しいアドバイスが表示されます。</p>`;
   }
 
-  // 九星（β方位）
+  // 九星（修正版：本命星＋β方位）
   document.getElementById("kigaku").innerHTML = renderKigaku(utcA);
 
   // 風水アドバイス（自動生成）
