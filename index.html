@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>あなたの鑑定｜数秘＋宿曜（読みやすい完全版・短いカレンダー）</title>
+<title>あなたの鑑定｜数秘＋宿曜（36ヶ月カレンダー対応 完全版）</title>
 <style>
   :root{
     --bg:#0b0f14;--ink:#eaf1ff;--muted:#9fb1cf;--line:#223049;
     --panel:#111826;--panel2:#0c1728;--accent:#22d3ee;--accent2:#34d399;
-    --good:#34d399;--warn:#fbbf24;--bad:#f87171;
+    --love:#f472b6;--meet:#34d399;--marry:#fbbf24;--move:#60a5fa;--job:#c084fc;--work:#ffd580;--promo:#a5b4fc;
   }
   *{box-sizing:border-box}
   body{margin:0;background:#05080c;color:var(--ink);
@@ -16,7 +16,7 @@
   header{padding:26px 16px;text-align:center;background:linear-gradient(180deg,#0a0f13,#0a1320)}
   header h1{margin:0 0 6px;font-size:24px;letter-spacing:.04em}
   header p{margin:0;color:var(--muted)}
-  main{max-width:1100px;margin:0 auto;padding:16px}
+  main{max-width:1120px;margin:0 auto;padding:16px}
   .card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;margin:14px 0;box-shadow:0 8px 24px rgba(0,0,0,.26)}
   label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px}
   input,select,button{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:#0b1422;color:var(--ink)}
@@ -31,16 +31,22 @@
   .row{display:grid;gap:12px}
   @media(min-width:900px){.row{grid-template-columns:1fr 1fr}}
   .calendar{display:grid;gap:12px}
-  @media(min-width:900px){.calendar{grid-template-columns:repeat(3,1fr)}}
+  /* 3カラム固定（📅📅📅） */
+  .calendar{grid-template-columns:1fr}
+  @media(min-width:680px){.calendar{grid-template-columns:repeat(2,1fr)}}
+  @media(min-width:960px){.calendar{grid-template-columns:repeat(3,1fr)}}
   .mon{border:1px solid var(--line);border-radius:12px;padding:10px;background:#0b1422;position:relative}
   .mon.now{outline:2px solid var(--accent);box-shadow:0 0 0 4px rgba(34,211,238,.2)}
   .head{display:flex;justify-content:space-between;align-items:center}
-  .tag{display:inline-block;font-size:11px;border:1px solid var(--line);border-radius:6px;padding:1px 6px;margin:2px 6px 0 0}
-  .t-love{color:#f472b6;border-color:#5a2b4b}
-  .t-marry{color:#fbbf24;border-color:#7c4a03}
-  .t-meet{color:#34d399;border-color:#184e3a}
-  .t-move{color:#60a5fa;border-color:#1e3a5f}
-  .t-job{color:#c084fc;border-color:#3c2a5e}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+  .tag{display:inline-flex;align-items:center;gap:4px;font-size:11px;border:1px solid var(--line);border-radius:6px;padding:2px 6px}
+  .t-love{color:var(--love)}
+  .t-meet{color:var(--meet)}
+  .t-marry{color:var(--marry)}
+  .t-move{color:var(--move)}
+  .t-job{color:var(--job)}
+  .t-work{color:var(--work)}
+  .t-promo{color:var(--promo)}
   .hr{height:1px;background:#1e2d44;margin:10px 0}
   .filters{display:flex;gap:8px;flex-wrap:wrap}
   .filters label{border:1px solid var(--line);padding:6px 10px;border-radius:999px;cursor:pointer;background:#0b1422}
@@ -114,10 +120,10 @@
 
   <!-- 恋愛 -->
   <div class="card" id="secLove">
-    <h2>恋愛｜惹かれやすいタイプ & 宿曜相性</h2>
+    <h2>恋愛｜惹かれやすいタイプ & 宿曜×数秘 相性スコア</h2>
     <div id="sectionLove"></div>
     <div class="box" id="compat"></div>
-    <p class="small muted">※相手の生年月日を入れると、宿曜にもとづく恋愛相性と具体アドバイスが表示されます。</p>
+    <p class="small muted">※相手の生年月日を入れると、宿曜＋数秘で点数化した相性と、長文アドバイス（風水付き）が表示されます。</p>
   </div>
 
   <!-- 意味・使命 -->
@@ -138,25 +144,21 @@
     <div id="sectionBoku"></div>
   </div>
 
-  <!-- カレンダー（短く要点だけ） -->
+  <!-- 36ヶ月カレンダー -->
   <div class="card" id="secCal">
-    <h2>スケジュールの味方｜18ヶ月の見どころカレンダー</h2>
+    <h2>予定を組みやすい36ヶ月カレンダー</h2>
     <div class="small muted">
-      表示は「個人月」（1〜9のサイクル）をもとに、<strong>わかりやすい言葉のタグ</strong>に置き換えています。<br/>
-      例）恋愛が動く／結婚の話が進みやすい／出会いのチャンス／引越しの追い風／転職に追い風 など。
+      「個人月（1〜9）」をベースに、<strong>わかりやすい言葉タグ</strong>で表示。各月は最大3タグまで（恋愛／出会い／結婚／引越し／転職／仕事運／昇格）。
     </div>
     <div class="filters small" style="margin-top:8px">
       <label><input type="checkbox" class="ft" value="love" checked> 恋愛</label>
-      <label><input type="checkbox" class="ft" value="marry" checked> 結婚</label>
       <label><input type="checkbox" class="ft" value="meet" checked> 出会い</label>
+      <label><input type="checkbox" class="ft" value="marry" checked> 結婚</label>
       <label><input type="checkbox" class="ft" value="move" checked> 引越し</label>
       <label><input type="checkbox" class="ft" value="job" checked> 転職</label>
-      <select id="spanSel" style="margin-left:auto;max-width:160px">
-        <option value="12">期間：12ヶ月</option>
-        <option value="18" selected>期間：18ヶ月</option>
-        <option value="36">期間：36ヶ月</option>
-      </select>
-      <button id="applyFilter" style="max-width:140px">反映</button>
+      <label><input type="checkbox" class="ft" value="work" checked> 仕事運</label>
+      <label><input type="checkbox" class="ft" value="promo" checked> 昇格</label>
+      <button id="applyFilter" style="max-width:140px;margin-left:auto">反映</button>
     </div>
     <div id="calendar" class="calendar" style="margin-top:10px"></div>
   </div>
@@ -164,7 +166,7 @@
   <!-- 前世（エンタメ） -->
   <div class="card" id="secPast">
     <h2>前世のヒント（エンタメ読み）</h2>
-    <p class="small muted">※楽しむ読み物です。医学・歴史的事実の証明ではありません。</p>
+    <p class="small muted">※楽しむ読み物です。事実の証明ではありません。</p>
     <div id="sectionPast"></div>
     <button id="regenPast" style="margin-top:8px;max-width:220px">もう一度読んでみる</button>
   </div>
@@ -175,7 +177,7 @@
 </main>
 
 <script>
-/* ===== 基本ユーティリティ ===== */
+/* ========= 基本ユーティリティ ========= */
 const d2r=d=>d*Math.PI/180, norm360=x=>(x%360+360)%360;
 function toDateTZ(dateStr,timeStr,tzHours){
   const [y,m,d]=dateStr.split("-").map(Number);
@@ -191,7 +193,7 @@ function JD(utc){
   return Math.floor(365.25*(Y+4716))+Math.floor(30.6001*(M+1))+D+B-1524.5;
 }
 
-/* ===== 宿曜（黄経→27宿） ===== */
+/* ========= 宿曜（黄経→27宿） ========= */
 function moonLon(utc){
   const t=(JD(utc)-2451545)/36525;
   const L0=norm360(218.3164477+481267.88123421*t-0.0015786*t*t+t*t*t/538841-t*t*t*t/65194000);
@@ -211,27 +213,40 @@ function moonLon(utc){
 const SHUKU=["角木蛟","亢金龍","氐土貉","房日兎","心月狐","尾火虎","箕水豹","斗木獬","女土蝠","虚日鼠","危月燕","室火猪","壁水貐","奎木狼","婁金狗","胃土雉","昴日鵠","畢月烏","觜火猴","参水猿","井木犴","鬼金羊","柳土獐","星日馬","張月鹿","翼火蛇","軫水蚓"];
 function shukuOf(utc){ const lon=moonLon(utc); const idx=Math.floor(lon/(360/27)); return {name:SHUKU[idx], idx}; }
 
-/* ===== 数秘 ===== */
+/* ========= 数秘 ========= */
 const sumDigits=n=>String(n).split("").reduce((a,b)=>a+Number(b),0);
 function reduceNum(n){ if([11,22,33].includes(n))return n; let r=n; while(r>9) r=sumDigits(r); return r; }
 const lifePath=(y,m,d)=>{const t=sumDigits(y)+sumDigits(m)+sumDigits(d); return [11,22,33].includes(t)?t:reduceNum(t);};
 const pYear=(bY,bM,bD,year)=>reduceNum(reduceNum(bM+bD)+reduceNum(year));
 const pMonth=(pyear,month)=>reduceNum(pyear+month);
 
-/* ===== プロファイル（数秘・宿曜） ===== */
+/* ========= プロファイル ========= */
 const LP_PROFILE={
-  1:{t:"開拓者",traits:"自分で切りひらく力・決断の速さ",love:"尊敬できる人",jobs:["起業家","法人営業","店舗経営","事業企画","PM","イベント制作","消防/救急"]},
-  2:{t:"調和者",traits:"聞く・つなぐ・橋渡し",love:"やさしさと安心感",jobs:["人事","採用","秘書","通訳","カウンセラー","保育士","CS"]},
-  3:{t:"表現者",traits:"アイデア・言葉・発信",love:"会話とユーモア",jobs:["広報","コピー","編集","デザイナー/動画","SNS運用","講師"]},
-  4:{t:"構築者",traits:"仕組み・信頼・継続",love:"誠実さ",jobs:["経理","総務","品質管理","不動産","公務員","SRE/運用","製造責任者"]},
-  5:{t:"変化推進",traits:"自由・旅・刷新",love:"刺激と自由",jobs:["旅行業","広告営業","フリーエンジニア","新規事業","運輸","通訳ガイド"]},
-  6:{t:"責任と愛",traits:"面倒見・美と調和",love:"家族観の一致",jobs:["看護師","教師","ブライダル","インテリア","人事労務","店舗SV","CA"]},
-  7:{t:"探究者",traits:"深い学び・専門性",love:"知性と距離感",jobs:["データサイエンス","バックエンド","研究","薬剤師","法律/特許","セキュリティ","占い師"]},
-  8:{t:"実現者",traits:"結果・お金・統率",love:"仕事理解",jobs:["経営者","金融/投資","不動産開発","営業統括","コンサル","商社/外資"]},
-  9:{t:"奉仕者",traits:"共感・表現・社会性",love:"世界観の一致",jobs:["福祉","心理","NPO","音楽家","写真家","舞台演出","国際協力"]},
-  11:{t:"啓発者",traits:"直感・インスピレーション",love:"波長の一致",jobs:["カウンセラー","講演家","作家/作詞","ヒーラー","ヨガ/瞑想","占星術師"]},
-  22:{t:"大器構築",traits:"大計画を形に",love:"大志の共有",jobs:["インフラPM","都市計画","PO/PMM","病院/学校経営","教育PF"]},
-  33:{t:"無条件の愛",traits:"癒やし・芸術で貢献",love:"包容力",jobs:["小児/訪問看護","療育","音楽/アート療法","料理家","コミュニティ運営","ブランドデザイン"]}
+  1:{t:"開拓者",traits:"自分で切りひらく力・決断の速さ",love:"尊敬できる人",
+    jobs:["起業家","法人営業","店舗経営","事業企画","プロジェクトマネージャー","イベント制作","消防/救急"]},
+  2:{t:"調和者",traits:"聞く・つなぐ・橋渡し",love:"やさしさと安心感",
+    jobs:["人事","採用","秘書","通訳","カウンセラー","保育士","カスタマーサポート"]},
+  3:{t:"表現者",traits:"アイデア・言葉・発信",love:"会話とユーモア",
+    jobs:["広報","コピーライター","編集","デザイナー/動画","SNS運用","講師"]},
+  4:{t:"構築者",traits:"仕組み・信頼・継続",love:"誠実さ",
+    jobs:["経理","総務","品質管理","不動産","公務員","SRE/運用","製造責任者"]},
+  5:{t:"変化推進",traits:"自由・旅・刷新",love:"刺激と自由",
+    jobs:["旅行業","広告営業","フリーエンジニア","新規事業","運輸","通訳ガイド"]},
+  6:{t:"責任と愛",traits:"面倒見・美と調和",love:"家族観の一致",
+    jobs:["看護師","教師","ブライダル","インテリア","人事労務","店舗SV","CA"]},
+  7:{t:"探究者",traits:"深い学び・専門性",love:"知性と距離感",
+    jobs:["データサイエンス","バックエンド","研究","薬剤師","法律/特許","セキュリティ","占い師"]},
+  8:{t:"実現者",traits:"結果・お金・統率",love:"仕事理解",
+    jobs:["経営者","金融/投資","不動産開発","営業統括","コンサル","商社/外資"]},
+  9:{t:"奉仕者",traits:"共感・表現・社会性",love:"世界観の一致",
+    jobs:["社会福祉士","臨床心理士/公認心理師アシスタント","NPO/NGOプログラムオフィサー","スクールカウンセラー",
+          "音楽療法士","スタジオ/広告フォトグラファー","舞台演出家/舞台監督","国際協力（JICA/国連系）","コミュニティオーガナイザー"]},
+  11:{t:"啓発者",traits:"直感・インスピレーション",love:"波長の一致",
+    jobs:["カウンセラー","講演家","作家/作詞","ヒーラー","ヨガ/瞑想インストラクター","占星術師"]},
+  22:{t:"大器構築",traits:"大計画を形に",love:"大志の共有",
+    jobs:["インフラPM","都市計画","プロダクトオーナー","病院/学校経営","教育プラットフォーム運営"]},
+  33:{t:"無条件の愛",traits:"癒やし・芸術で貢献",love:"包容力",
+    jobs:["小児/訪問看護","療育","音楽/アート療法","料理家","コミュニティ運営","ブランドデザイン"]}
 };
 const SHUKU_PROFILE={
   "角木蛟":{kw:"はじめる・伸びる",stage:"起業/営業/企画/開発"},
@@ -263,7 +278,7 @@ const SHUKU_PROFILE={
   "軫水蚓":{kw:"いやし・旅立ち",stage:"医療/福祉/支援/移動"}
 };
 
-/* ===== 相性（距離→関係名） ===== */
+/* ========= 相性（宿曜距離→関係名）＋点数 ========= */
 const REL_NAME=["命","危","安","—","壊","—","—","—","業","友","—","—","—","栄","衰","—","—","—","成","胎","—","—","壊","—","安","危","—"];
 function relationByDistance(d){
   const base=REL_NAME[d];
@@ -279,28 +294,57 @@ function relationByDistance(d){
   if(d<=18) return "成";
   return "衰";
 }
+const REL_BASE_SCORE={ "命":85,"栄":82,"友":80,"成":78,"安":76,"胎":74,"衰":68,"業":62,"危":60,"壊":55 };
+function lpCompatDelta(a,b){
+  const diff=Math.abs(a-b);
+  if(diff<=1) return +8;
+  if(diff<=3) return +4;
+  if(diff<=5) return 0;
+  return -4;
+}
+function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
+function compatScore(rel,lpA,lpB){
+  const base=REL_BASE_SCORE[rel]??70;
+  const delta=lpCompatDelta(lpA,lpB);
+  return clamp(base+delta,40,99);
+}
 
-/* ===== 文章生成 ===== */
+/* ========= テキスト生成 ========= */
 function WorkText(lp,shuku){
   const L=LP_PROFILE[lp], S=SHUKU_PROFILE[shuku]||{};
-  const jobs=(L.jobs||[]).slice(0,7).join("・");
+  // さらに具体：カテゴリー→具体職種の“説明付き”
+  const concrete = (lp===9)
+    ? [
+        "社会福祉士：生活や制度の橋渡し役。『困っている人に具体策を』が得意。",
+        "臨床心理/公認心理師アシスタント：話を丁寧に聴き、心を軽くする。",
+        "NPO/NGOプログラムオフィサー：現場の課題を企画に落とし、助成金や連携を動かす。",
+        "スクールカウンセラー：学校現場で子どもと保護者の間に立つ。",
+        "音楽療法士：音の力で感情を解放し、回復を助ける。",
+        "スタジオ/広告フォトグラファー：人や物の『らしさ』を引き出す撮影。",
+        "舞台演出家/舞台監督：チームの才能を束ね、作品に仕上げる。",
+        "国際協力（JICA/国連系）：現地の声を政策と行動に変える。",
+        "コミュニティオーガナイザー：地域の人をつなぎ、場を育てる。"
+      ]
+    : (L.jobs||[]).map(j=>j); // 他LPは既定の具体職種
   return `
   <p class="lead">あなたは<strong>${L.t}</strong>タイプ。${L.traits}。宿曜は<strong>${shuku}</strong>（キーワード：「${S.kw||"やさしさ"}」）。</p>
   <p><strong>働き方のコツ：</strong>あなたの得意なやり方を<strong>「やる順番のメモ（手順書）」</strong>にして、毎回同じ流れで進めると迷いが減り、結果が安定します。</p>
   <h3>向いている職業（具体）</h3>
-  <p>${jobs}</p>
+  <ul>${concrete.slice(0,9).map(x=>`<li>${x}</li>`).join("")}</ul>
   <p class="small muted">※宿曜の舞台：${S.stage||"人を支える領域"}。強みが活きる場を選ぶと、自然に評価が上がります。</p>`;
 }
-function LoveText(lp,shuku,gender){
+
+function LoveTypeText(gender){
   const g=gender==="female"?"男性":"相手";
   return `
   <h3>惹かれやすい${g}</h3>
-  <p>あなたは<strong>会話のテンポが合う人</strong>に惹かれます。清潔感があり、自然な笑顔で、少しユーモアのある人だと心が動きやすいタイプ。長々と話すより<strong>結論をシンプルに伝える人</strong>に安心します。</p>
+  <p>あなたは<strong>会話のテンポが合う人</strong>に惹かれます。清潔感と自然な笑顔、少しのユーモアで心が動きやすいタイプ。長々と話すより<strong>結論がシンプル</strong>な人に安心します。</p>
   <p><strong>連絡の相性：</strong>長文より短くテンポよく。即レスでなくても、やり取りの“リズム”が合えば心地よく感じます。</p>
   <p><strong>デートの相性：</strong>静かすぎる場所より、<strong>小さく新鮮</strong>なカフェや展示会、屋外イベントが◎。映画後に感想を3つ伝え合う時間に、距離がぐっと縮まります。</p>
   <p><strong>注意ポイント：</strong>束縛・詰問・返信の強要はNG。「お互いが自由であること」を最初に約束すると長続きします。</p>
   <p><strong>長続きの3ルール：</strong>①週1回は一緒に小さな体験　②「返信がない＝考える時間」と約束　③月1回10分だけ“時間・お金・家事”の話をする。</p>`;
 }
+
 function MeaningText(lp,shuku){
   return `
   <p><strong>あなたが生まれてきた意味：</strong>あなたは、人の心にそっと灯りをともすために生まれてきました。人の気持ちを感じ取り、やさしく寄りそう力が、誰かの希望になります。</p>
@@ -308,6 +352,8 @@ function MeaningText(lp,shuku){
   <p><strong>恋愛・仕事への影響：</strong>恋愛ではその感受性が相手を癒やし、仕事では<strong>自分の言葉</strong>で誠実に語るほど信頼が広がります。</p>
   <p><strong>生き方のヒント：</strong>頑張るよりも、自分が心地よい状態を大切に。あなたが満たされているとき、その優しさは自然と周りに伝わります。</p>`;
 }
+
+/* ========= 風水（今日・今月・来月） ========= */
 function FengText(pmonth){
   const PMONTH={
     1:{now:{room:"玄関と入口まわり",plan:["朝の換気で新しい風を入れる","靴は3足まで並べる","表札・ドアノブ・照明を磨く"]},
@@ -342,6 +388,8 @@ function FengText(pmonth){
     <p>理由：${p.next.why}。${p.next.todo.join("／")}。来月に入る前に<strong>一つだけ</strong>着手しておくと効果が出やすくなります。</p>
   </div>`;
 }
+
+/* ========= 卜（今月・来月） ========= */
 function BokuText(by,bm,bd){
   const now=new Date();
   const thisY=now.getFullYear(), thisM=now.getMonth()+1;
@@ -405,70 +453,135 @@ function BokuText(by,bm,bd){
   </div>`;
 }
 
-/* ===== カレンダー：言葉タグ＆短縮 ===== */
+/* ========= カレンダー（36ヶ月・3カラム・タグ拡充） ========= */
 function monthLabels(pm,shuku){
+  // 月ごとの最大3タグ：優先度 結婚>昇格>転職>恋愛>出会い>引越し>仕事運
   const tags=[];
-  const push=(k)=>tags.push(k);
-  // 基本方針：各月 最大2タグに抑える（優先度：結婚>転職>恋愛>出会い>引越し）
-  if(pm===6){push(["結婚の話が進みやすい","t-marry"]);}
-  if(pm===8){push(["転職・昇進に追い風","t-job"]);}
-  if(pm===2||pm===6){ if(tags.length<2) push(["恋愛が育ちやすい","t-love"]); }
-  if([1,3,5].includes(pm)){ if(tags.length<2) push(["出会いのチャンス","t-meet"]); }
-  if(pm===5){ if(tags.length<2) push(["引越しの追い風","t-move"]); }
-  // 宿曜の補助（軽い追い風/慎重）
+  const add=(l,cls)=>{ if(tags.length<3) tags.push([l,cls]); };
+  if(pm===6) add("結婚の話が進みやすい","t-marry");
+  if(pm===8) add("昇格・交渉の追い風","t-promo");
+  if(pm===1||pm===5||pm===8) add("転職・挑戦に追い風","t-job");
+  if(pm===2||pm===6) add("恋愛が育ちやすい","t-love");
+  if([1,3,5].includes(pm)) add("出会いのチャンス","t-meet");
+  if(pm===5) add("引越しの追い風","t-move");
+  // 常に1つは“仕事運”の基礎タグを候補
+  if(tags.length<3 && (pm===3||pm===4||pm===8)) add("仕事運：成果に結びつく月","t-work");
+  // 宿曜の軽い補助
   const goodS=["角木蛟","房日兎","尾火虎","箕水豹","昴日鵠","張月鹿","翼火蛇","奎木狼","室火猪","星日馬","軫水蚓"];
   const warnS=["虚日鼠","鬼金羊"];
-  if(goodS.includes(shuku) && tags.length<2) push(["宿曜の追い風","t-meet"]);
-  if(warnS.includes(shuku) && tags.length<2) push(["少し慎重に","t-move"]);
-  return tags.slice(0,2);
+  if(tags.length<3 && goodS.includes(shuku)) add("宿曜の追い風","t-meet");
+  if(tags.length<3 && warnS.includes(shuku)) add("少し慎重に計画を","t-work");
+  return tags;
 }
-function renderCalendar(root,by,bm,bd,shuku,months=18,filters={love:true,marry:true,meet:true,move:true,job:true}){
+function renderCalendar(root,by,bm,bd,shuku,months=36,filters){
   root.innerHTML="";
   const now=new Date();
   const start=new Date(Date.UTC(now.getFullYear(),now.getMonth(),1));
   for(let i=0;i<months;i++){
     const d=new Date(Date.UTC(start.getUTCFullYear(),start.getUTCMonth()+i,1));
     const py=pYear(by,bm,bd,d.getUTCFullYear()), pm=pMonth(py,d.getUTCMonth()+1);
-    let tags=monthLabels(pm,shuku);
-    // フィルタ適用
-    tags = tags.filter(([label,cls])=>(
+    let tags=monthLabels(pm,shuku).filter(([label,cls])=>(
       (cls==="t-love" && filters.love) ||
-      (cls==="t-marry" && filters.marry) ||
       (cls==="t-meet" && filters.meet) ||
+      (cls==="t-marry" && filters.marry) ||
       (cls==="t-move" && filters.move) ||
-      (cls==="t-job" && filters.job)
+      (cls==="t-job" && filters.job) ||
+      (cls==="t-work" && filters.work) ||
+      (cls==="t-promo" && filters.promo)
     ));
     const box=document.createElement("div");
     const isNow = (d.getUTCFullYear()===now.getFullYear() && d.getUTCMonth()===now.getMonth());
     box.className="mon"+(isNow?" now":"");
     box.innerHTML=`<div class="head"><strong>📅 ${d.getUTCFullYear()}年${d.getUTCMonth()+1}月</strong><span class="pill">個人月 ${pm}</span></div>
-      <div style="margin-top:6px">${tags.map(t=>`<span class="tag ${t[1]}">${t[0]}</span>`).join("")||'<span class="small muted">大きな動きは少なめ。準備や休息に◎</span>'}</div>`;
+      <div class="tags">${tags.map(t=>`<span class="tag ${t[1]}">#${t[0]}</span>`).join("")||'<span class="small muted">#準備・休息に良い月</span>'}</div>`;
     root.appendChild(box);
   }
 }
 
-/* ===== 相性テキスト ===== */
-const REL_DETAIL={
-  "命":{tone:"似た者同士で深く分かり合える。",tips:["初対面は趣味や仕事の話から","同じ時間と“各自の時間”のバランス","テンポが似る","役割分担で張り合い回避"]},
-  "友":{tone:"自然体で支え合える相性。",tips:["友達モードで信頼作り","普段の時間を一緒に","用件＋ねぎらいの一言","家事とお金のルール"]},
-  "成":{tone:"段取りがハマり現実が進む。",tips:["将来像を言葉に","一緒に“作る”時間","次の予定を具体化","月1棚卸し"]},
-  "危":{tone:"刺激は強い。波に注意。",tips:["追いすぎない","非日常OKだが早めに解散","短く明るく","境界線と休む日"]},
-  "安":{tone:"安心と癒やし。",tips:["困りごとを1つ軽く","食とスキンシップ","生活の話題","週1『自立の日』"]},
-  "栄":{tone:"引き上げ合える華の縁。",tips:["良さを言葉で伝える","写真映え/舞台/展示","褒め＋次の提案","見せる日と休む日のメリハリ"]},
-  "衰":{tone:"力を抜く学びの縁。",tips:["小さな共同作業","散歩や図書館","短いメモでOK","積み上げログ"]},
-  "壊":{tone:"衝突が出やすい。",tips:["違いを先に共有","短時間×高頻度","要点のみ","Yes/No/保留テンプレ"]},
-  "業":{tone:"課題を引き受ける縁。",tips:["実利サポートは小さく","引っ張りすぎない","やったことを短く共有","役割交代デー"]},
-  "胎":{tone:"育ち合う縁。時間が味方。",tips:["共通の学び","期待値は低め","『今日の一行』で十分","3ヶ月ごとの小目標"]}
+/* ========= 相性：長文＋スコア＋風水 ========= */
+const REL_TONE={
+  "命":"似た者同士で深く分かり合える相性。似すぎるがゆえの張り合いは、役割分担で回避。",
+  "友":"自然体で支え合える相性。日常がそのまま愛になる。",
+  "成":"段取りがハマり現実が進む相性。共同作業で深まる。",
+  "栄":"お互いを引き上げ合う華の縁。見せ場があるほど加速。",
+  "安":"安心と癒やしの相性。ぬくもりと生活感が鍵。",
+  "胎":"育ち合う縁。ゆっくりの歩みが大きな実りに。",
+  "衰":"力を抜く学びの縁。等身大で向き合うと味わい深い。",
+  "業":"課題の縁。小出しの支え合いが成長に変わる。",
+  "危":"刺激が強い。境界線とクールダウンが長続きの鍵。",
+  "壊":"価値観のズレが出やすい。ルール設計で守りながら進む。"
 };
-function compatLoveAdvice(rel){
-  const d=REL_DETAIL[rel]||{tone:"—",tips:[]};
-  const t=d.tips;
+function compatNarrative(rel,lpA,lpB,shA,shB){
+  const tone=REL_TONE[rel]||"";
+  const pairLP=`数秘では、${lpA} と ${lpB} の組み合わせ。`;
+  const pairS=`宿曜は「${shA}」×「${shB}」。`;
+  // 行動提案（関係別）
+  const T = {
+    "命":[
+      "同じ強みが重なる分、“役割分担のメモ”を最初に作ると摩擦が激減。",
+      "週1回の共同作業（料理・運動・片付け）で、仲の良さがそのまま成果に。"
+    ],
+    "友":[
+      "普段の生活を一緒に過ごすだけで関係が育つ。買い物や散歩など“生活デート”を増やす。",
+      "記念日より“こまめなねぎらい”が効く。"
+    ],
+    "成":[
+      "次の予定をカレンダーで先に決めると、自然に前進。",
+      "家事や支払いを“見える化”して、月1の棚卸しを。"
+    ],
+    "栄":[
+      "お互いの良さを言葉で伝える日を作る。“見せる場”（写真・舞台・SNS）で運気も恋も上がる。",
+      "疲れたら“休む日”をはっきり分けると長続き。"
+    ],
+    "安":[
+      "食事・睡眠・スキンシップなど“体が安心する時間”を増やす。",
+      "依存には注意。“自立の日”を週1で作る。"
+    ],
+    "胎":[
+      "共通の学び（講座や配信）でゆっくり育つ。期待値は低めに、進捗は3ヶ月ごとに見る。",
+      "“できたこと”を一言で共有する習慣が効く。"
+    ],
+    "衰":[
+      "散歩や図書館のような静かな時間が合う。小さな積み重ねを楽しむ。",
+      "成果を急がず、日々の『ありがとう』を記録。"
+    ],
+    "業":[
+      "大きな背負い込みはNG。サポートは小さく区切って、互いの自立を守る。",
+      "役割交代デーを設けると偏りが矯正。"
+    ],
+    "危":[
+      "非日常の刺激は短時間で。早めに解散して余韻を楽しむ。",
+      "境界線（返信時間・お金・距離）を先に決める。"
+    ],
+    "壊":[
+      "Yes/No/保留のテンプレを作って感情の衝突を回避。",
+      "デートは短時間×高頻度。要点だけで伝える練習を。"
+    ]
+  }[rel] || ["お互いの違いを言語化して、進め方のルールを先に決める。","月1回、時間・お金・家事を10分見直す。"];
+  // 風水アドバイス（カップル）
+  const feng = {
+    "love":"寝室の鏡は寝姿が映らない位置へ。ベッドの片側に“ペアの物”（枕/クッション）を置き、右側に温かい照明を。",
+    "talk":"ダイニングに“二人席”を固定。向かい合いより“L字”や“横並び”にすると喧嘩が減る。",
+    "money":"玄関を毎朝換気。名刺・鍵置き場を整えると信用運が上がり、金の悩みが減る。"
+  };
   return `
-  <p class="lead">恋愛の相性：<strong>${rel}</strong> — ${d.tone}</p>
-  <p><strong>アプローチ：</strong>${t[0]||"自然体で"}／ <strong>デート：</strong>${t[1]||"短時間で新鮮な場所"}／ <strong>連絡：</strong>${t[2]||"短くテンポよく"}／ <strong>長続き：</strong>${t[3]||"月1回の小さな見直し"}</p>`;
+    <p class="lead"><strong>関係の空気：</strong>${tone}</p>
+    <p>${pairS}${pairLP}</p>
+    <p><strong>うまくいくコツ：</strong>${T[0]} ${T[1]}</p>
+    <p><strong>風水の後押し：</strong>${feng.love} ${feng.talk} ${feng.money}</p>`;
+}
+function compatLoveAdviceFull(rel,lpA,lpB,shA,shB,score){
+  return `
+  <p class="lead">恋愛相性（宿曜×数秘スコア）：<strong>${score} / 100</strong>　｜　関係名：<strong>${rel}</strong></p>
+  ${compatNarrative(rel,lpA,lpB,shA,shB)}
+  <div class="box">
+    <p><strong>連絡：</strong>${rel==="危"?"短く明るく。即レスを求めない合図を先に。":"短くテンポよく。既読スルーは“考える時間”の合図に。"}<br>
+       <strong>デート：</strong>${rel==="栄"?"写真映えや舞台・展示で“見せ場”を。":"映画/展示/新しいカフェなど“小さく新鮮”。"}<br>
+       <strong>長続き：</strong>月1回10分の「時間・お金・家事」ミーティング。役割分担をメモ化。</p>
+  </div>`;
 }
 
-/* ===== 前世（エンタメ生成） ===== */
+/* ========= 前世（エンタメ） ========= */
 function PastLifeText(lp,shuku){
   const theme={
     1:"開拓と先導の魂。新しい道を切りひらく役目。",
@@ -485,55 +598,55 @@ function PastLifeText(lp,shuku){
     33:"癒やしと芸術の魂。愛で人を温める役目。"
   }[lp] || "やさしさの魂。";
   return `
-  <p>前世のテーマは「${theme}」の系譜にあります。<br>
-  宿曜「${shuku}」の気質から、<strong>『始める/整える/発信する』</strong>のいずれかで人の役に立っていた可能性。<br>
-  いまの人生では、その続きを<strong>もっと軽やかに・楽しみながら</strong>やるだけで良い、というサインです。</p>
-  <p class="muted small">※エンタメ読みです。重く受け止めず、今日の一歩のヒントとして楽しんでください。</p>`;
+  <p>前世のテーマは「${theme}」。宿曜「${shuku}」は“始める/整える/発信する”のどれかに縁が濃いサイン。いまの人生では、その続きを<strong>軽やかに・楽しみながら</strong>やるだけで充分です。</p>
+  <p class="muted small">※エンタメ読みです。今日の一歩のヒントとしてお楽しみください。</p>`;
 }
 
-/* ===== メイン処理 ===== */
+/* ========= メイン処理 ========= */
 function runAll(){
   const dA=document.getElementById("birthA").value; if(!dA){alert("あなたの生年月日を入力してください");return;}
   const tzSel=document.getElementById("tz").value||"";
   const utcA=toDateTZ(dA, document.getElementById("timeA").value||"", tzSel);
   const y=utcA.getUTCFullYear(), m=utcA.getUTCMonth()+1, d=utcA.getUTCDate();
-  const lp=lifePath(y,m,d);
+  const lpA=lifePath(y,m,d);
   const shA=shukuOf(utcA);
   const py=pYear(y,m,d,(new Date()).getFullYear());
   const pmon=pMonth(py,(new Date()).getMonth()+1);
 
   // KPI
-  document.getElementById("lifePath").textContent=lp;
+  document.getElementById("lifePath").textContent=lpA;
   document.getElementById("shukuA").textContent=shA.name;
   document.getElementById("pyear").textContent=py;
 
   // 仕事
-  document.getElementById("sectionWork").innerHTML=WorkText(lp,shA.name);
+  document.getElementById("sectionWork").innerHTML=WorkText(lpA,shA.name);
 
-  // 恋愛
+  // 惹かれやすいタイプ（基礎）
   const gender=document.getElementById("genderA").value||"";
-  document.getElementById("sectionLove").innerHTML=LoveText(lp,shA.name, gender);
+  document.getElementById("sectionLove").innerHTML=LoveTypeText(gender);
 
-  // 相性
+  // 相性（相手がいれば詳細＋スコア）
   const dB=document.getElementById("birthB").value;
   const compatBox=document.getElementById("compat");
   if(dB){
     const utcB=toDateTZ(dB, document.getElementById("timeB").value||"", tzSel);
+    const lpB=lifePath(utcB.getUTCFullYear(),utcB.getUTCMonth()+1,utcB.getUTCDate());
     const shB=shukuOf(utcB);
     const N=27, cw=(shB.idx-shA.idx+N)%N, ccw=(shA.idx-shB.idx+N)%N, dist=Math.min(cw,ccw);
     const rel=relationByDistance(dist);
+    const score=compatScore(rel,lpA,lpB);
     compatBox.innerHTML = `
       <div class="row">
-        <div class="box"><strong>あなた</strong><br>本命宿：${shA.name}</div>
-        <div class="box"><strong>お相手</strong><br>本命宿：${shB.name}</div>
+        <div class="box"><strong>あなた</strong><br>本命宿：${shA.name}／数秘：${lpA}</div>
+        <div class="box"><strong>お相手</strong><br>本命宿：${shB.name}／数秘：${lpB}</div>
       </div>
-      ${compatLoveAdvice(rel)}`;
+      ${compatLoveAdviceFull(rel,lpA,lpB,shA.name,shB.name,score)}`;
   }else{
-    compatBox.innerHTML=`<p class="muted">相手の生年月日を入れると、恋愛相性が表示されます。</p>`;
+    compatBox.innerHTML=`<p class="muted">相手の生年月日を入れると、宿曜×数秘の点数と長文アドバイス（風水付き）が表示されます。</p>`;
   }
 
   // 使命
-  document.getElementById("sectionMeaning").innerHTML=MeaningText(lp,shA.name);
+  document.getElementById("sectionMeaning").innerHTML=MeaningText(lpA,shA.name);
 
   // 風水
   document.getElementById("sectionFeng").innerHTML=FengText(pmon);
@@ -541,13 +654,12 @@ function runAll(){
   // 卜
   document.getElementById("sectionBoku").innerHTML=BokuText(y,m,d);
 
-  // カレンダー（短縮＆フィルタ）
-  const months=parseInt(document.getElementById("spanSel").value||"18",10);
+  // 36ヶ月カレンダー（3列）
   const filters={}; document.querySelectorAll(".ft").forEach(cb=>filters[cb.value]=cb.checked);
-  renderCalendar(document.getElementById("calendar"), y,m,d, shA.name, months, filters);
+  renderCalendar(document.getElementById("calendar"), y,m,d, shA.name, 36, filters);
 
   // 前世（エンタメ）
-  document.getElementById("sectionPast").innerHTML=PastLifeText(lp,shA.name);
+  document.getElementById("sectionPast").innerHTML=PastLifeText(lpA,shA.name);
 }
 document.getElementById("run").addEventListener("click", runAll);
 document.getElementById("applyFilter").addEventListener("click", runAll);
