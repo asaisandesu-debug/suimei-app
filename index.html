@@ -309,10 +309,55 @@ function compatScore(rel,lpA,lpB){
   return clamp(base+delta,40,99);
 }
 
-/* ========= テキスト生成 ========= */
-function WorkText(lp,shuku){
+/* ========= 文章バリエーション用ユーティリティ ========= */
+let variantOffset = 0;
+function seedFrom(...xs){
+  let s = 1779033703;
+  for(const x of xs){
+    const str = String(x);
+    for(let i=0;i<str.length;i++){
+      s = Math.imul(s ^ str.charCodeAt(i), 3432918353);
+      s = (s << 13) | (s >>> 19);
+    }
+  }
+  return (s >>> 0);
+}
+function mulberry32(a){
+  return function(){
+    let t = a += 0x6D2B79F5;
+    t = Math.imul(t ^ t >>> 15, t | 1);
+    t ^= t + Math.imul(t ^ t >>> 7, t | 61);
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  }
+}
+function choice(rng, arr){ return arr[Math.floor(rng()*arr.length)] }
+function pickN(rng, arr, n){
+  const a=[...arr]; const out=[];
+  while(out.length < Math.min(n,a.length)){
+    out.push(a.splice(Math.floor(rng()*a.length),1)[0]);
+  }
+  return out;
+}
+
+/* ========= テキスト生成（バリエーション対応版） ========= */
+function WorkText(lp,shuku, rng){
   const L=LP_PROFILE[lp], S=SHUKU_PROFILE[shuku]||{};
-  // さらに具体：カテゴリー→具体職種の“説明付き”
+  const tips = [
+    "あなたの得意な手順を<strong>短いチェックリスト</strong>にして、迷いを消す。",
+    "作業を<strong>“①準備→②実行→③確認”</strong>の3段で固定。時間見積りも毎回更新。",
+    "「朝15分の段取り→昼の集中1本→夜の振り返り5分」の<strong>日課テンプレ</strong>を作る。",
+    "繰り返す仕事は<strong>台本化</strong>（挨拶・導入・クロージングを定型文に）。",
+    "週初めに<strong>“やらないリスト”</strong>を作り、集中を守る。",
+    "成果が出た型に<strong>名前を付けて保存</strong>（○○式）。再現率が跳ね上がる。"
+  ];
+  const tail = {
+    7:"静かな集中時間を確保すると更に伸びます。",
+    8:"数字で進捗を見せると評価が一気に上がります。",
+    9:"誰かの役に立つ実感を可視化すると続きます。",
+    11:"ひらめきをメモ→即小さく試すが吉。",
+    22:"“大枠→分割”の順で計画化を。",
+    33:"ケアの時間を先に確保してから予定を組もう。"
+  }[lp] || "自分のペースを守ると結果が安定します。";
   const concrete = (lp===9)
     ? [
         "社会福祉士：生活や制度の橋渡し役。『困っている人に具体策を』が得意。",
@@ -325,36 +370,124 @@ function WorkText(lp,shuku){
         "国際協力（JICA/国連系）：現地の声を政策と行動に変える。",
         "コミュニティオーガナイザー：地域の人をつなぎ、場を育てる。"
       ]
-    : (L.jobs||[]).map(j=>j); // 他LPは既定の具体職種
+    : (L.jobs||[]);
+  const pickedTips = pickN(rng, tips, 2).join("／");
+  const pickedJobs = pickN(rng, concrete, Math.min(9, concrete.length));
+
   return `
-  <p class="lead">あなたは<strong>${L.t}</strong>タイプ。${L.traits}。宿曜は<strong>${shuku}</strong>（キーワード：「${S.kw||"やさしさ"}」）。</p>
-  <p><strong>働き方のコツ：</strong>あなたの得意なやり方を<strong>「やる順番のメモ（手順書）」</strong>にして、毎回同じ流れで進めると迷いが減り、結果が安定します。</p>
+  <p class="lead">あなたは<strong>${L.t}</strong>タイプ。${L.traits}。宿曜は<strong>${shuku}</strong>（キーワード：「${(SHUKU_PROFILE[shuku]||{}).kw||"やさしさ"}」）。</p>
+  <p><strong>働き方のコツ：</strong>${pickedTips}。${tail}</p>
   <h3>向いている職業（具体）</h3>
-  <ul>${concrete.slice(0,9).map(x=>`<li>${x}</li>`).join("")}</ul>
-  <p class="small muted">※宿曜の舞台：${S.stage||"人を支える領域"}。強みが活きる場を選ぶと、自然に評価が上がります。</p>`;
+  <ul>${pickedJobs.map(x=>`<li>${x}</li>`).join("")}</ul>
+  <p class="small muted">※宿曜の舞台：${(SHUKU_PROFILE[shuku]||{}).stage||"人を支える領域"}。強みが活きる場を選ぶと、自然に評価が上がります。</p>`;
 }
 
-function LoveTypeText(gender){
+function LoveTypeText(gender, lp, shuku, rng){
   const g=gender==="female"?"男性":"相手";
+  const openers = [
+    `あなたは<strong>会話のテンポが合う人</strong>に惹かれます。`,
+    `惹かれやすいのは<strong>空気が軽くてテンポが合う人</strong>。`,
+    `心が動くのは<strong>フィーリングが合う人</strong>。`
+  ];
+  const looks = [
+    "清潔感と自然な笑顔、少しのユーモアが決め手。",
+    "姿勢と手元が整っている人に安心します。",
+    "香りや身だしなみなど“さりげない配慮”に弱いタイプ。"
+  ];
+  const contact = [
+    "長文より<strong>短くテンポよく</strong>。即レスじゃなくても“リズム”が合えばOK。",
+    "用件＋ひとことの2行メッセージが心地いい。既読スルーは“考える時間”の合図に。",
+    "朝か夜のどちらかに<strong>時間帯を寄せる</strong>と続きやすい。"
+  ];
+  const dateIdeas = [
+    "小さく新鮮なカフェや展示、屋外イベントが◎。",
+    "映画→感想を<strong>3つだけ</strong>言い合うと距離が縮む。",
+    "静かすぎる場所より“適度に賑わい”のある所で。"
+  ];
+  const caution = [
+    "束縛・詰問・返信の強要はNG。「お互いの自由」を最初に約束して。",
+    "“なぜ返事が遅いの？”より“返事のペースを決めよう”で平和に。",
+    "相手の予定に踏み込みすぎない。境界線があるほど長続き。"
+  ];
+  const lpTail = {
+    1:"結論がシンプルだと安心できます。",
+    3:"褒め言葉＋軽い冗談が効きます。",
+    5:"予定は直前に決める日もあると◎。",
+    7:"静かな時間を共有できる人が合います。",
+    8:"数字や計画を話せると信頼が増します。",
+    11:"直感が合うことを大事に。",
+    33:"やさしい言葉とスキンシップを。"
+  }[lp] || "";
+  const rules = [
+    "①週1で小さな体験　②“返信がない＝考える時間”　③月1回10分の家事・お金ミーティング",
+    "①短時間でも会う　②既読スルーは許容　③役割分担をメモ化",
+    "①写真を撮る日を作る　②予定は2択で提案　③月1回“費用は割り勘/交互”を確認"
+  ];
   return `
   <h3>惹かれやすい${g}</h3>
-  <p>あなたは<strong>会話のテンポが合う人</strong>に惹かれます。清潔感と自然な笑顔、少しのユーモアで心が動きやすいタイプ。長々と話すより<strong>結論がシンプル</strong>な人に安心します。</p>
-  <p><strong>連絡の相性：</strong>長文より短くテンポよく。即レスでなくても、やり取りの“リズム”が合えば心地よく感じます。</p>
-  <p><strong>デートの相性：</strong>静かすぎる場所より、<strong>小さく新鮮</strong>なカフェや展示会、屋外イベントが◎。映画後に感想を3つ伝え合う時間に、距離がぐっと縮まります。</p>
-  <p><strong>注意ポイント：</strong>束縛・詰問・返信の強要はNG。「お互いが自由であること」を最初に約束すると長続きします。</p>
-  <p><strong>長続きの3ルール：</strong>①週1回は一緒に小さな体験　②「返信がない＝考える時間」と約束　③月1回10分だけ“時間・お金・家事”の話をする。</p>`;
+  <p>${choice(rng, openers)} ${choice(rng, looks)} ${lpTail}</p>
+  <p><strong>連絡の相性：</strong>${choice(rng, contact)}</p>
+  <p><strong>デートの相性：</strong>${choice(rng, dateIdeas)}</p>
+  <p><strong>注意ポイント：</strong>${choice(rng, caution)}</p>
+  <p><strong>長続きの3ルール：</strong>${choice(rng, rules)}</p>`;
 }
 
-function MeaningText(lp,shuku){
+function MeaningText(lp,shuku, rng){
+  const open = [
+    "あなたは、人の心にそっと灯りをともすために生まれてきました。",
+    "あなたの人生の核は、誰かの心に小さな希望を渡すこと。",
+    "あなたの存在そのものが、周りの人の安心の拠り所になります。"
+  ];
+  const mission = [
+    "言葉や体験を通じて人を前向きにすること。",
+    "日常の一言や行動で、誰かの背中を押すこと。",
+    "大げさな“成功”より、目の前の人を軽くすること。"
+  ];
+  const impact = [
+    "恋愛ではその感受性が相手を癒やし、仕事では<strong>自分の言葉</strong>で語るほど信頼が広がります。",
+    "恋愛は“安心の時間”が鍵。仕事は<strong>等身大の発信</strong>で評価が伸びます。",
+    "恋愛は“聞く力”が武器。仕事は<strong>小さな改善</strong>を積み上げるほど成果に。"
+  ];
+  const hint = [
+    "頑張るよりも、自分が心地よい状態を大切に。",
+    "睡眠と食事を整えると、やさしさが自然に伝わります。",
+    "1日5分の内省と深呼吸で、感性が磨かれます。"
+  ];
+  const tail = {
+    1:"“始める役”を引き受けると使命が動く。",
+    2:"人と人をつなぐほど道が開く。",
+    3:"言葉・音・映像で表現すると広がる。",
+    4:"仕組み化で誰かが楽になるとき、使命が輝く。",
+    5:"旅・刷新が使命のスイッチ。",
+    6:"ケアと美しさがテーマの中心。",
+    7:"学びと静けさの中で深まる。",
+    8:"結果で支える形が合う。",
+    9:"困っている人に寄り添うほど光る。",
+    11:"直感の橋をかける役目。",
+    22:"大きな器（場）をつくるほど意味が増す。",
+    33:"癒やしと芸術が道になる。"
+  }[lp] || "";
+
   return `
-  <p><strong>あなたが生まれてきた意味：</strong>あなたは、人の心にそっと灯りをともすために生まれてきました。人の気持ちを感じ取り、やさしく寄りそう力が、誰かの希望になります。</p>
-  <p><strong>あなたの使命：</strong>言葉や体験を通じて人を前向きにすること。大きなことは要りません。目の前の人に「大丈夫」と伝えられるその瞬間、使命は動いています。</p>
-  <p><strong>恋愛・仕事への影響：</strong>恋愛ではその感受性が相手を癒やし、仕事では<strong>自分の言葉</strong>で誠実に語るほど信頼が広がります。</p>
-  <p><strong>生き方のヒント：</strong>頑張るよりも、自分が心地よい状態を大切に。あなたが満たされているとき、その優しさは自然と周りに伝わります。</p>`;
+  <p><strong>あなたが生まれてきた意味：</strong>${choice(rng, open)}</p>
+  <p><strong>あなたの使命：</strong>${choice(rng, mission)} ${tail}</p>
+  <p><strong>恋愛・仕事への影響：</strong>${choice(rng, impact)}</p>
+  <p><strong>生き方のヒント：</strong>${choice(rng, hint)}</p>`;
 }
 
-/* ========= 風水（今日・今月・来月） ========= */
-function FengText(pmonth){
+function FengText(pmonth, rng){
+  const todayIdeas = [
+    "玄関の金属（ドアノブ/鍵）を磨く",
+    "靴は3足だけ出す",
+    "朝の5分換気をする",
+    "シンクと洗面台を拭いて乾かす",
+    "排水口に重曹＋クエン酸",
+    "寝具を日光に当てる",
+    "ベッドの右側に“ペアの物”を置く",
+    "ダイニングに二人席を作る"
+  ];
+  const picked = pickN(rng, todayIdeas, 3);
+
   const PMONTH={
     1:{now:{room:"玄関と入口まわり",plan:["朝の換気で新しい風を入れる","靴は3足まで並べる","表札・ドアノブ・照明を磨く"]},
        next:{room:"ダイニング/寝室",why:"人との距離感を整える",todo:["二人席を作る","寝具カバーを洗う/新調","ペア小物を置く"]}},
@@ -378,14 +511,93 @@ function FengText(pmonth){
   const p=PMONTH[pmonth];
   return `
   <h3>今日からできる3つ</h3>
-  <p>① <strong>玄関：</strong>靴は3足まで＆朝に風を通す。<br>
-     ② <strong>水回り：</strong>夜はシンクと洗面台を<strong>乾かしてから</strong>寝る。<br>
-     ③ <strong>寝室：</strong>寝具を日光に当て、ベッドの右側に<strong>“ペアの物”</strong>を置く（恋愛運◎）。</p>
+  <p>① ${picked[0]}　② ${picked[1]}　③ ${picked[2]}</p>
   <div class="box">
     <p class="lead"><strong>今月の整え：</strong>${p.now.room}</p>
     <p>${p.now.plan.join("／")}。まずは<strong>10分だけ</strong>でもOK。「できた所から」で運が流れます。</p>
     <p class="lead"><strong>来月の整え（先取り）：</strong>${p.next.room}</p>
     <p>理由：${p.next.why}。${p.next.todo.join("／")}。来月に入る前に<strong>一つだけ</strong>着手しておくと効果が出やすくなります。</p>
+  </div>`;
+}
+
+/* ========= 相性：長文＋スコア＋風水（元のまま） ========= */
+const REL_TONE={
+  "命":"似た者同士で深く分かり合える相性。似すぎるがゆえの張り合いは、役割分担で回避。",
+  "友":"自然体で支え合える相性。日常がそのまま愛になる。",
+  "成":"段取りがハマり現実が進む相性。共同作業で深まる。",
+  "栄":"お互いを引き上げ合う華の縁。見せ場があるほど加速。",
+  "安":"安心と癒やしの相性。ぬくもりと生活感が鍵。",
+  "胎":"育ち合う縁。ゆっくりの歩みが大きな実りに。",
+  "衰":"力を抜く学びの縁。等身大で向き合うと味わい深い。",
+  "業":"課題の縁。小出しの支え合いが成長に変わる。",
+  "危":"刺激が強い。境界線とクールダウンが長続きの鍵。",
+  "壊":"価値観のズレが出やすい。ルール設計で守りながら進む。"
+};
+function compatNarrative(rel,lpA,lpB,shA,shB){
+  const tone=REL_TONE[rel]||"";
+  const pairLP=`数秘では、${lpA} と ${lpB} の組み合わせ。`;
+  const pairS=`宿曜は「${shA}」×「${shB}」。`;
+  const T = {
+    "命":[
+      "同じ強みが重なる分、“役割分担のメモ”を最初に作ると摩擦が激減。",
+      "週1回の共同作業（料理・運動・片付け）で、仲の良さがそのまま成果に。"
+    ],
+    "友":[
+      "普段の生活を一緒に過ごすだけで関係が育つ。買い物や散歩など“生活デート”を増やす。",
+      "記念日より“こまめなねぎらい”が効く。"
+    ],
+    "成":[
+      "次の予定をカレンダーで先に決めると、自然に前進。",
+      "家事や支払いを“見える化”して、月1の棚卸しを。"
+    ],
+    "栄":[
+      "お互いの良さを言葉で伝える日を作る。“見せる場”（写真・舞台・SNS）で運気も恋も上がる。",
+      "疲れたら“休む日”をはっきり分けると長続き。"
+    ],
+    "安":[
+      "食事・睡眠・スキンシップなど“体が安心する時間”を増やす。",
+      "依存には注意。“自立の日”を週1で作る。"
+    ],
+    "胎":[
+      "共通の学び（講座や配信）でゆっくり育つ。期待値は低めに、進捗は3ヶ月ごとに見る。",
+      "“できたこと”を一言で共有する習慣が効く。"
+    ],
+    "衰":[
+      "散歩や図書館のような静かな時間が合う。小さな積み重ねを楽しむ。",
+      "成果を急がず、日々の『ありがとう』を記録。"
+    ],
+    "業":[
+      "大きな背負い込みはNG。サポートは小さく区切って、互いの自立を守る。",
+      "役割交代デーを設けると偏りが矯正。"
+    ],
+    "危":[
+      "非日常の刺激は短時間で。早めに解散して余韻を楽しむ。",
+      "境界線（返信時間・お金・距離）を先に決める。"
+    ],
+    "壊":[
+      "Yes/No/保留のテンプレを作って感情の衝突を回避。",
+      "デートは短時間×高頻度。要点だけで伝える練習を。"
+    ]
+  }[rel] || ["お互いの違いを言語化して、進め方のルールを先に決める。","月1回、時間・お金・家事を10分見直す。"];
+  const feng = {
+    "love":"寝室の鏡は寝姿が映らない位置へ。ベッドの片側に“ペアの物”（枕/クッション）を置き、右側に温かい照明を。",
+    "talk":"ダイニングに“二人席”を固定。向かい合いより“L字”や“横並び”にすると喧嘩が減る。",
+    "money":"玄関を毎朝換気。名刺・鍵置き場を整えると信用運が上がり、金の悩みが減る。"
+  };
+  return `
+    <p class="lead"><strong>関係の空気：</strong>${tone}</p>
+    <p>${pairS}${pairLP}</p>
+    <p><strong>うまくいくコツ：</strong>${T[0]} ${T[1]}</p>
+    <p><strong>風水の後押し：</strong>${feng.love} ${feng.talk} ${feng.money}</p>`;
+}
+function compatLoveAdviceFull(rel,lpA,lpB,shA,shB,score){
+  return `
+  <p class="lead">恋愛相性（宿曜×数秘スコア）：<strong>${score} / 100</strong>　｜　関係名：<strong>${rel}</strong></p>
+  ${compatNarrative(rel,lpA,lpB,shA,shB)}
+  <div class="box">
+    <p><strong>連絡：</strong>${rel==="危"?"短く明るく。即レスを求めない合図を先に。":"短くテンポよく。既読スルーは“考える時間”の合図に。"}<br>
+       <strong>デート：</strong>${rel==="栄"?"写真映えや舞台・展示で“見せ場”を。":"映画/展示/新しいカフェなど“小さく新鮮”。"}<br>
+       <strong>長続き：</strong>月1回10分の「時間・お金・家事」ミーティング。役割分担をメモ化。</p>
   </div>`;
 }
 
@@ -453,9 +665,8 @@ function BokuText(by,bm,bd){
   </div>`;
 }
 
-/* ========= カレンダー（36ヶ月・3カラム・タグ拡充） ========= */
+/* ========= カレンダー（36ヶ月） ========= */
 function monthLabels(pm,shuku){
-  // 月ごとの最大3タグ：優先度 結婚>昇格>転職>恋愛>出会い>引越し>仕事運
   const tags=[];
   const add=(l,cls)=>{ if(tags.length<3) tags.push([l,cls]); };
   if(pm===6) add("結婚の話が進みやすい","t-marry");
@@ -464,9 +675,7 @@ function monthLabels(pm,shuku){
   if(pm===2||pm===6) add("恋愛が育ちやすい","t-love");
   if([1,3,5].includes(pm)) add("出会いのチャンス","t-meet");
   if(pm===5) add("引越しの追い風","t-move");
-  // 常に1つは“仕事運”の基礎タグを候補
   if(tags.length<3 && (pm===3||pm===4||pm===8)) add("仕事運：成果に結びつく月","t-work");
-  // 宿曜の軽い補助
   const goodS=["角木蛟","房日兎","尾火虎","箕水豹","昴日鵠","張月鹿","翼火蛇","奎木狼","室火猪","星日馬","軫水蚓"];
   const warnS=["虚日鼠","鬼金羊"];
   if(tags.length<3 && goodS.includes(shuku)) add("宿曜の追い風","t-meet");
@@ -496,89 +705,6 @@ function renderCalendar(root,by,bm,bd,shuku,months=36,filters){
       <div class="tags">${tags.map(t=>`<span class="tag ${t[1]}">#${t[0]}</span>`).join("")||'<span class="small muted">#準備・休息に良い月</span>'}</div>`;
     root.appendChild(box);
   }
-}
-
-/* ========= 相性：長文＋スコア＋風水 ========= */
-const REL_TONE={
-  "命":"似た者同士で深く分かり合える相性。似すぎるがゆえの張り合いは、役割分担で回避。",
-  "友":"自然体で支え合える相性。日常がそのまま愛になる。",
-  "成":"段取りがハマり現実が進む相性。共同作業で深まる。",
-  "栄":"お互いを引き上げ合う華の縁。見せ場があるほど加速。",
-  "安":"安心と癒やしの相性。ぬくもりと生活感が鍵。",
-  "胎":"育ち合う縁。ゆっくりの歩みが大きな実りに。",
-  "衰":"力を抜く学びの縁。等身大で向き合うと味わい深い。",
-  "業":"課題の縁。小出しの支え合いが成長に変わる。",
-  "危":"刺激が強い。境界線とクールダウンが長続きの鍵。",
-  "壊":"価値観のズレが出やすい。ルール設計で守りながら進む。"
-};
-function compatNarrative(rel,lpA,lpB,shA,shB){
-  const tone=REL_TONE[rel]||"";
-  const pairLP=`数秘では、${lpA} と ${lpB} の組み合わせ。`;
-  const pairS=`宿曜は「${shA}」×「${shB}」。`;
-  // 行動提案（関係別）
-  const T = {
-    "命":[
-      "同じ強みが重なる分、“役割分担のメモ”を最初に作ると摩擦が激減。",
-      "週1回の共同作業（料理・運動・片付け）で、仲の良さがそのまま成果に。"
-    ],
-    "友":[
-      "普段の生活を一緒に過ごすだけで関係が育つ。買い物や散歩など“生活デート”を増やす。",
-      "記念日より“こまめなねぎらい”が効く。"
-    ],
-    "成":[
-      "次の予定をカレンダーで先に決めると、自然に前進。",
-      "家事や支払いを“見える化”して、月1の棚卸しを。"
-    ],
-    "栄":[
-      "お互いの良さを言葉で伝える日を作る。“見せる場”（写真・舞台・SNS）で運気も恋も上がる。",
-      "疲れたら“休む日”をはっきり分けると長続き。"
-    ],
-    "安":[
-      "食事・睡眠・スキンシップなど“体が安心する時間”を増やす。",
-      "依存には注意。“自立の日”を週1で作る。"
-    ],
-    "胎":[
-      "共通の学び（講座や配信）でゆっくり育つ。期待値は低めに、進捗は3ヶ月ごとに見る。",
-      "“できたこと”を一言で共有する習慣が効く。"
-    ],
-    "衰":[
-      "散歩や図書館のような静かな時間が合う。小さな積み重ねを楽しむ。",
-      "成果を急がず、日々の『ありがとう』を記録。"
-    ],
-    "業":[
-      "大きな背負い込みはNG。サポートは小さく区切って、互いの自立を守る。",
-      "役割交代デーを設けると偏りが矯正。"
-    ],
-    "危":[
-      "非日常の刺激は短時間で。早めに解散して余韻を楽しむ。",
-      "境界線（返信時間・お金・距離）を先に決める。"
-    ],
-    "壊":[
-      "Yes/No/保留のテンプレを作って感情の衝突を回避。",
-      "デートは短時間×高頻度。要点だけで伝える練習を。"
-    ]
-  }[rel] || ["お互いの違いを言語化して、進め方のルールを先に決める。","月1回、時間・お金・家事を10分見直す。"];
-  // 風水アドバイス（カップル）
-  const feng = {
-    "love":"寝室の鏡は寝姿が映らない位置へ。ベッドの片側に“ペアの物”（枕/クッション）を置き、右側に温かい照明を。",
-    "talk":"ダイニングに“二人席”を固定。向かい合いより“L字”や“横並び”にすると喧嘩が減る。",
-    "money":"玄関を毎朝換気。名刺・鍵置き場を整えると信用運が上がり、金の悩みが減る。"
-  };
-  return `
-    <p class="lead"><strong>関係の空気：</strong>${tone}</p>
-    <p>${pairS}${pairLP}</p>
-    <p><strong>うまくいくコツ：</strong>${T[0]} ${T[1]}</p>
-    <p><strong>風水の後押し：</strong>${feng.love} ${feng.talk} ${feng.money}</p>`;
-}
-function compatLoveAdviceFull(rel,lpA,lpB,shA,shB,score){
-  return `
-  <p class="lead">恋愛相性（宿曜×数秘スコア）：<strong>${score} / 100</strong>　｜　関係名：<strong>${rel}</strong></p>
-  ${compatNarrative(rel,lpA,lpB,shA,shB)}
-  <div class="box">
-    <p><strong>連絡：</strong>${rel==="危"?"短く明るく。即レスを求めない合図を先に。":"短くテンポよく。既読スルーは“考える時間”の合図に。"}<br>
-       <strong>デート：</strong>${rel==="栄"?"写真映えや舞台・展示で“見せ場”を。":"映画/展示/新しいカフェなど“小さく新鮮”。"}<br>
-       <strong>長続き：</strong>月1回10分の「時間・お金・家事」ミーティング。役割分担をメモ化。</p>
-  </div>`;
 }
 
 /* ========= 前世（エンタメ） ========= */
@@ -613,17 +739,23 @@ function runAll(){
   const py=pYear(y,m,d,(new Date()).getFullYear());
   const pmon=pMonth(py,(new Date()).getMonth()+1);
 
+  // ★ 鑑定ボタンを押すたびに表現を変える（クリック回数でオフセット）
+  variantOffset++;
+
+  // ★ 人ごと＋クリック回数で乱数を生成
+  const rng = mulberry32( seedFrom(y,m,d, shA.idx, variantOffset) );
+
   // KPI
   document.getElementById("lifePath").textContent=lpA;
   document.getElementById("shukuA").textContent=shA.name;
   document.getElementById("pyear").textContent=py;
 
   // 仕事
-  document.getElementById("sectionWork").innerHTML=WorkText(lpA,shA.name);
+  document.getElementById("sectionWork").innerHTML=WorkText(lpA,shA.name, rng);
 
-  // 惹かれやすいタイプ（基礎）
+  // 惹かれやすいタイプ（バリエーション）
   const gender=document.getElementById("genderA").value||"";
-  document.getElementById("sectionLove").innerHTML=LoveTypeText(gender);
+  document.getElementById("sectionLove").innerHTML=LoveTypeText(gender, lpA, shA.name, rng);
 
   // 相性（相手がいれば詳細＋スコア）
   const dB=document.getElementById("birthB").value;
@@ -646,21 +778,23 @@ function runAll(){
   }
 
   // 使命
-  document.getElementById("sectionMeaning").innerHTML=MeaningText(lpA,shA.name);
+  document.getElementById("sectionMeaning").innerHTML=MeaningText(lpA,shA.name, rng);
 
   // 風水
-  document.getElementById("sectionFeng").innerHTML=FengText(pmon);
+  document.getElementById("sectionFeng").innerHTML=FengText(pmon, rng);
 
   // 卜
   document.getElementById("sectionBoku").innerHTML=BokuText(y,m,d);
 
-  // 36ヶ月カレンダー（3列）
+  // 36ヶ月カレンダー
   const filters={}; document.querySelectorAll(".ft").forEach(cb=>filters[cb.value]=cb.checked);
   renderCalendar(document.getElementById("calendar"), y,m,d, shA.name, 36, filters);
 
   // 前世（エンタメ）
   document.getElementById("sectionPast").innerHTML=PastLifeText(lpA,shA.name);
 }
+
+// ボタンイベント
 document.getElementById("run").addEventListener("click", runAll);
 document.getElementById("applyFilter").addEventListener("click", runAll);
 document.getElementById("regenPast").addEventListener("click", ()=>{
