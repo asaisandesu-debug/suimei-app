@@ -211,7 +211,7 @@ const lifePath=(y,m,d)=>{const t=sumDigits(y)+sumDigits(m)+sumDigits(d); return 
 const pYear=(bY,bM,bD,year)=>reduceNum(reduceNum(bM+bD)+reduceNum(year));
 const pMonth=(pyear,month)=>reduceNum(pyear+month);
 
-/* ========= プロファイル（職業拡張つき） ========= */
+/* ========= プロファイル ========= */
 const LP_PROFILE={
   1:{t:"開拓者",traits:"自分で切りひらく力・決断の速さ",love:"尊敬できる人",
     jobs:["起業家","法人営業","店舗経営","事業企画","プロジェクトマネージャー","イベント制作","消防/救急","新規開拓セールス","プロダクトマネージャー","ベンチャー経営"]},
@@ -269,7 +269,7 @@ const SHUKU_PROFILE={
   "軫水蚓":{kw:"いやし・旅立ち",stage:"医療/福祉/支援/移動"}
 };
 
-/* ========= 相性（宿曜距離→関係名）＋点数 ========= */
+/* ========= 相性 ========= */
 const REL_NAME=["命","危","安","—","壊","—","—","—","業","友","—","—","—","栄","衰","—","—","—","成","胎","—","—","壊","—","安","危","—"];
 function relationByDistance(d){
   const base=REL_NAME[d];
@@ -290,7 +290,7 @@ function lpCompatDelta(a,b){ const diff=Math.abs(a-b); if(diff<=1) return +8; if
 function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
 function compatScore(rel,lpA,lpB){ const base=REL_BASE_SCORE[rel]??70; const delta=lpCompatDelta(lpA,lpB); return clamp(base+delta,40,99); }
 
-/* ========= 文章バリエーション用ユーティリティ ========= */
+/* ========= 文章ユーティリティ ========= */
 let variantOffset = 0;
 function seedFrom(...xs){
   let s = 1779033703;
@@ -339,7 +339,6 @@ function WorkText(lp,shuku, rng){
     33:"ケアの時間を先に確保してから予定を組もう。"
   }[lp] || "自分のペースを守ると結果が安定します。";
 
-  // LPの職業拡張＋宿曜の舞台を反映
   const baseJobs = (L.jobs||[]);
   const stageAdd = (S.stage||"").split("/").filter(Boolean);
   const stageMap = {
@@ -358,28 +357,44 @@ function WorkText(lp,shuku, rng){
     "編集":"編集","UX":"UXデザイナー","PM":"プロジェクトマネージャー",
     "職人":"クラフト作家","整備":"整備士","医療":"医療事務",
     "飲食":"飲食店運営","小売":"バイヤー","介護":"介護福祉士",
-    "表現":"フォトグラファー","営業":"法人営業","舞台":"舞台演出",
+    "表現":"フォトグラファー","舞台":"舞台演出",
     "公務":"公務員","メーカー":"生産管理",
-    "IT":"データアナリスト","法律":"パラリーガル","分析":"ビジネスアナリスト",
-    "起業":"スタートアップ経営","新規事業":"事業開発","コンサル":"コンサルタント",
-    "教育":"講師","治療":"作業療法士",
+    "法律":"パラリーガル","分析":"ビジネスアナリスト",
+    "新規事業":"事業開発","コンサル":"コンサルタント",
+    "治療":"作業療法士",
     "守り":"リスク管理","改善":"品質改善","内省":"リトリート企画",
-    "接客":"ホテルフロント","観光":"ツアーガイド","ベンチャー":"ベンチャー総合職",
+    "観光":"ツアーガイド","ベンチャー":"ベンチャー総合職",
     "貿易":"貿易実務","外資":"外資営業","交通":"航空/鉄道",
-    "広報":"PRプランナー","司会":"MC","芸能":"タレントサポート","接客":"VIPアテンド",
-    "戦略":"戦略コンサル","分析":"アナリティクス","金融":"資産運用",
-    "医療":"医療ソーシャルワーカー","福祉":"福祉コーディネーター","支援":"キャリアコーチ","移動":"トラベルコーディネーター"
+    "PR":"PRプランナー","司会":"MC","芸能":"タレントサポート","VIP":"VIPアテンド",
+    "戦略":"戦略コンサル","アナリティクス":"アナリティクス","資産運用":"資産運用",
+    "医療福祉":"医療ソーシャルワーカー"
   };
   const stageJobs = stageAdd.map(x=>stageMap[x]||x).filter(Boolean);
 
   const pool = uniq([...baseJobs, ...stageJobs, "コーチ/メンター","ナレッジマネジメント","コミュニティ運営","プロダクトマーケ","カスタマーサクセス","フィールドセールス","インサイドセールス","データ可視化"]);
   const pickedJobs = pickN(rng, pool, Math.max(8, Math.min(12, pool.length)));
 
+  const tips = [
+    "作業は<strong>“①準備→②実行→③確認”</strong>の3段で固定。毎回の迷いをゼロにする。",
+    "繰り返す仕事は<strong>台本化</strong>（挨拶・導入・クロージングを定型に）。",
+    "週初めに<strong>“やらないリスト”</strong>を作って集中を死守。",
+    "「朝15分の段取り→昼の集中1本→夜の振り返り5分」を<strong>日課テンプレ</strong>に。",
+    "成果が出た型に<strong>名前（○○式）</strong>を付けて保存。再現率が跳ね上がる。",
+    "依頼は<strong>締切・目的・成果物</strong>の3点を書面化。誤差を最初から潰す。"
+  ];
   const pickedTips = pickN(rng, tips, 2).join("／");
 
   return `
   <p class="lead">あなたは<strong>${L.t}</strong>タイプ。${L.traits}。宿曜は<strong>${shuku}</strong>（キーワード：「${(SHUKU_PROFILE[shuku]||{}).kw||"やさしさ"}」）。</p>
-  <p><strong>働き方のコツ：</strong>${pickedTips} ${tail}</p>
+  <p><strong>働き方のコツ：</strong>${pickedTips} ${{
+    7:"静かな集中時間を先にカレンダー確保すると、更に伸びます。",
+    8:"数字で進捗を見せるほど評価が一気に上がります。",
+    9:"“誰の役に立てたか”を可視化すると、継続力が増します。",
+    11:"ひらめきをメモ→その日のうちに小さく試すが吉。",
+    22:"“大枠→分割→担当”の順で計画化を。",
+    33:"ケアの時間を先に確保してから予定を組もう。"
+  }[lp] || "自分のペースを守ると結果が安定します。"}
+  </p>
   <h3>向いている職業（具体）</h3>
   <ul>${pickedJobs.map(x=>`<li>${x}</li>`).join("")}</ul>
   <p class="small muted">※宿曜の舞台：${(SHUKU_PROFILE[shuku]||{}).stage||"人を支える領域"}。強みが活きる場を選ぶと、自然に評価が上がります。</p>`;
@@ -471,25 +486,29 @@ function MeaningText(lp,shuku, rng){
     33:"癒やしと芸術があなたの道になります。"
   }[lp] || "";
 
+  function choiceA(a){ return a[Math.floor(mulberry32(seedFrom(lp,shuku,variantOffset))()*a.length)]; }
+
   return `
-  <p><strong>あなたが生まれてきた意味：</strong>${choice(rng, open)}</p>
-  <p><strong>あなたの使命：</strong>${choice(rng, mission)} ${tail}</p>
-  <p><strong>恋愛・仕事への影響：</strong>${choice(rng, impact)}</p>
-  <p><strong>生き方のヒント：</strong>${choice(rng, hint)}</p>`;
+  <p><strong>あなたが生まれてきた意味：</strong>${choiceA(open)}</p>
+  <p><strong>あなたの使命：</strong>${choiceA(mission)} ${tail}</p>
+  <p><strong>恋愛・仕事への影響：</strong>${choiceA(impact)}</p>
+  <p><strong>生き方のヒント：</strong>${choiceA(hint)}</p>`;
 }
 
+/* ========= 風水（安全版：11/22/33対応） ========= */
 function FengText(pmonth, rng){
+  // 11/22/33を1〜9に畳む（例：11→2, 22→4, 33→6）
+  const base = (function reduceTo1to9(n){
+    const masters = [11,22,33];
+    if (masters.includes(n)) return ((n - 1) % 9) + 1;
+    while(n > 9){ n = String(n).split("").reduce((a,b)=>a+Number(b),0); }
+    return n || 1;
+  })(pmonth);
+
   const todayIdeas = [
-    "玄関の金属（ドアノブ/鍵）を磨く",
-    "靴は3足だけ出す",
-    "朝の5分換気をする",
-    "シンクと洗面台を拭いて乾かす",
-    "排水口に重曹＋クエン酸",
-    "寝具を日光に当てる",
-    "ベッドの右側に“ペアの物”を置く",
-    "ダイニングに二人席を作る",
-    "トイレのフタを閉めて換気を回す",
-    "ゴミ箱のライナーを新しくする"
+    "玄関の金属（ドアノブ/鍵）を磨く","靴は3足だけ出す","朝の5分換気をする",
+    "シンクと洗面台を拭いて乾かす","排水口に重曹＋クエン酸","寝具を日光に当てる",
+    "ベッドの右側に“ペアの物”を置く","ダイニングに二人席を作る","トイレのフタを閉めて換気を回す","ゴミ箱のライナーを新しくする"
   ];
   const picked = pickN(rng, todayIdeas, 3);
 
@@ -513,10 +532,13 @@ function FengText(pmonth, rng){
     9:{now:{room:"家全体（物置）",plan:["いらない物を1袋出す","ケーブルをまとめる","紙をデータ化"]},
        next:{room:"玄関と入口まわり",why:"新しい風の入口",todo:["朝の換気","靴3足ルール","金属部分を磨く"]}}
   };
-  const p=PMONTH[pmonth];
+
+  const p = PMONTH[base] || PMONTH[1];
+
   return `
   <h3>今日からできる3つ</h3>
-  <p>① ${picked[0]}　② ${picked[1]}　③ ${picked[2]}<br><span class="small muted">※時間がない日は1つだけでもOK。「できた所から」で運が流れます。</span></p>
+  <p>① ${picked[0]}　② ${picked[1]}　③ ${picked[2]}
+  <br><span class="small muted">※時間がない日は1つだけでもOK。「できた所から」で運が流れます。</span></p>
   <div class="box">
     <p class="lead"><strong>今月の整え：</strong>${p.now.room}</p>
     <p>${p.now.plan.join("／")}。まずは<strong>10分だけ</strong>でもOK。写真に残して進捗を見える化すると継続しやすくなります。</p>
@@ -606,7 +628,7 @@ function compatLoveAdviceFull(rel,lpA,lpB,shA,shB,score){
   </div>`;
 }
 
-/* ========= 卜（今月・来月：可変文） ========= */
+/* ========= 卜（今月・来月） ========= */
 function BokuText(by,bm,bd){
   const now=new Date();
   const thisY=now.getFullYear(), thisM=now.getMonth()+1;
@@ -617,16 +639,13 @@ function BokuText(by,bm,bd){
   const LEAD = {
     1:["新しい風を入れる月。","始動に最適。まずは小さく着手。"],
     2:["人とのつながりを整える月。","協調が成果を運ぶ。"],
-    3:["発信を強める月。","アイデアを形に。量から質へ。"],
+    3:["発信を強める月。","アイデアを形に。量から質へ. "],
     4:["土台を整える月。","仕組み化で安定感UP。"],
     5:["刷新と変化の月。","固定観念を1つ外す。"],
     6:["愛とケアの月。","関係性と暮らしを整える。"],
     7:["内観と休息の月。","学びに投資。攻めは控えめ。"],
     8:["成果と交渉の月。","値上げ/条件交渉◎。"],
-    9:["完了と手放しの月。","スペース作りが次の扉。"],
-    11:["直感が冴える月。","ひらめきを即テスト。"],
-    22:["大きな計画を動かす月。","役割と期日を明確に。"],
-    33:["ケアと表現の月。","誰かの役に立つ発信を。"]
+    9:["完了と手放しの月。","スペース作りが次の扉。"]
   };
   const WORK=[
     "テンプレ・台本・チェックリストを最新化。",
@@ -654,21 +673,19 @@ function BokuText(by,bm,bd){
     "寝具/枕の洗浄・天日干しで睡眠質UP。",
     "夜のカフェインを控え、就寝前30分は画面オフ。"
   ];
-  function buildPara(num){ return pickN(mulberry32(seedFrom(num, by,bm,bd, now.getMonth()+1)), WORK,1)[0]; }
-
   function blockFor(p){
-    const leadPair = LEAD[p] || LEAD[reduceNum(p)];
+    const leadPair = LEAD[p] || LEAD[((p-1)%9)+1];
     const rngLocal = mulberry32(seedFrom("boku",p,by,bm,bd,variantOffset));
+    const pick = arr => arr[Math.floor(rngLocal()*arr.length)];
     return `
     <div class="box">
       <p class="lead"><strong>${leadPair[0]}</strong> ${leadPair[1]}</p>
-      <p><strong>仕事：</strong>${choice(rngLocal, WORK)}</p>
-      <p><strong>恋愛：</strong>${choice(rngLocal, LOVE)}</p>
-      <p><strong>お金：</strong>${choice(rngLocal, MONEY)}</p>
-      <p><strong>健康：</strong>${choice(rngLocal, HEALTH)}</p>
+      <p><strong>仕事：</strong>${pick(WORK)}</p>
+      <p><strong>恋愛：</strong>${pick(LOVE)}</p>
+      <p><strong>お金：</strong>${pick(MONEY)}</p>
+      <p><strong>健康：</strong>${pick(HEALTH)}</p>
     </div>`;
   }
-
   return blockFor(pm) + blockFor(pmNext);
 }
 
@@ -716,6 +733,9 @@ function renderCalendar(root,by,bm,bd,shuku,months=36,filters){
 
 /* ========= メイン処理 ========= */
 function runAll(){
+  // iPadの未確定入力対策（まずフォーカスを外す）
+  document.activeElement && document.activeElement.blur();
+
   const dA=document.getElementById("birthA").value; if(!dA){alert("あなたの生年月日を入力してください");return;}
   const tzSel=document.getElementById("tz").value||"";
   const utcA=toDateTZ(dA, document.getElementById("timeA").value||"", tzSel);
@@ -728,7 +748,6 @@ function runAll(){
   // 鑑定ボタンを押すたびに表現が変化
   variantOffset++;
 
-  // 人ごと＋クリック回数で乱数生成
   const rng = mulberry32( seedFrom(y,m,d, shA.idx, variantOffset) );
 
   // KPI
@@ -766,8 +785,12 @@ function runAll(){
   // 使命
   document.getElementById("sectionMeaning").innerHTML=MeaningText(lpA,shA.name, rng);
 
-  // 風水
-  document.getElementById("sectionFeng").innerHTML=FengText(pmon, rng);
+  // 風水（例外が出ても先へ進む）
+  try{
+    document.getElementById("sectionFeng").innerHTML=FengText(pmon, rng);
+  }catch(e){
+    document.getElementById("sectionFeng").innerHTML='<p class="small muted">風水の生成で一時的なエラーが発生しました。</p>';
+  }
 
   // 卜
   document.getElementById("sectionBoku").innerHTML=BokuText(y,m,d);
