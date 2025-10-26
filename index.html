@@ -290,7 +290,7 @@ function lpCompatDelta(a,b){ const diff=Math.abs(a-b); if(diff<=1) return +8; if
 function clamp(n,min,max){return Math.max(min,Math.min(max,n));}
 function compatScore(rel,lpA,lpB){ const base=REL_BASE_SCORE[rel]??70; const delta=lpCompatDelta(lpA,lpB); return clamp(base+delta,40,99); }
 
-/* ========= 文章ユーティリティ ========= */
+/* ========= 乱数ユーティリティ ========= */
 let variantOffset = 0;
 function seedFrom(...xs){
   let s = 1779033703;
@@ -322,6 +322,7 @@ function uniq(arr){ return [...new Set(arr)]; }
 /* ========= テキスト生成 ========= */
 function WorkText(lp,shuku, rng){
   const L=LP_PROFILE[lp], S=SHUKU_PROFILE[shuku]||{};
+
   const tips = [
     "作業は<strong>“①準備→②実行→③確認”</strong>の3段で固定。毎回の迷いをゼロにする。",
     "繰り返す仕事は<strong>台本化</strong>（挨拶・導入・クロージングを定型に）。",
@@ -348,13 +349,13 @@ function WorkText(lp,shuku, rng){
     "接客":"販売/接客","美容":"ビューティーアドバイザー","エンタメ":"イベント制作","広報":"広報",
     "カウンセリング":"カウンセラー","芸術":"アートディレクター","執筆":"ライター",
     "マネジメント":"マネージャー","舞台":"舞台監督","スポーツ":"スポーツトレーナー",
-    "メディア":"メディア編集","マーケ":"マーケター","IT":"フロントエンド","教育":"講師",
+    "メディア":"メディア編集","マーケ":"マーケター","IT":"フロントエンド",
     "不動産":"不動産仲介","食":"食品企画","保守":"SRE/運用",
     "看護":"看護師","保育":"保育士","人事":"人事労務","バックオフィス":"総務",
     "物流":"ロジスティクス","旅行":"ツアープランナー","クリエイティブ":"クリエイター",
     "建設":"施工管理","金融":"ファイナンス","品質":"品質保証",
-    "セキュリティ":"セキュリティエンジニア","研究":"リサーチャー","監査":"監査アナリスト",
-    "編集":"編集","UX":"UXデザイナー","PM":"プロジェクトマネージャー",
+    "セキュリティ":"セキュリティエンジニア","研究":"リサーチャー",
+    "UX":"UXデザイナー","PM":"プロジェクトマネージャー",
     "職人":"クラフト作家","整備":"整備士","医療":"医療事務",
     "飲食":"飲食店運営","小売":"バイヤー","介護":"介護福祉士",
     "表現":"フォトグラファー","舞台":"舞台演出",
@@ -373,28 +374,11 @@ function WorkText(lp,shuku, rng){
 
   const pool = uniq([...baseJobs, ...stageJobs, "コーチ/メンター","ナレッジマネジメント","コミュニティ運営","プロダクトマーケ","カスタマーサクセス","フィールドセールス","インサイドセールス","データ可視化"]);
   const pickedJobs = pickN(rng, pool, Math.max(8, Math.min(12, pool.length)));
-
-  const tips = [
-    "作業は<strong>“①準備→②実行→③確認”</strong>の3段で固定。毎回の迷いをゼロにする。",
-    "繰り返す仕事は<strong>台本化</strong>（挨拶・導入・クロージングを定型に）。",
-    "週初めに<strong>“やらないリスト”</strong>を作って集中を死守。",
-    "「朝15分の段取り→昼の集中1本→夜の振り返り5分」を<strong>日課テンプレ</strong>に。",
-    "成果が出た型に<strong>名前（○○式）</strong>を付けて保存。再現率が跳ね上がる。",
-    "依頼は<strong>締切・目的・成果物</strong>の3点を書面化。誤差を最初から潰す。"
-  ];
   const pickedTips = pickN(rng, tips, 2).join("／");
 
   return `
   <p class="lead">あなたは<strong>${L.t}</strong>タイプ。${L.traits}。宿曜は<strong>${shuku}</strong>（キーワード：「${(SHUKU_PROFILE[shuku]||{}).kw||"やさしさ"}」）。</p>
-  <p><strong>働き方のコツ：</strong>${pickedTips} ${{
-    7:"静かな集中時間を先にカレンダー確保すると、更に伸びます。",
-    8:"数字で進捗を見せるほど評価が一気に上がります。",
-    9:"“誰の役に立てたか”を可視化すると、継続力が増します。",
-    11:"ひらめきをメモ→その日のうちに小さく試すが吉。",
-    22:"“大枠→分割→担当”の順で計画化を。",
-    33:"ケアの時間を先に確保してから予定を組もう。"
-  }[lp] || "自分のペースを守ると結果が安定します。"}
-  </p>
+  <p><strong>働き方のコツ：</strong>${pickedTips} ${tail}</p>
   <h3>向いている職業（具体）</h3>
   <ul>${pickedJobs.map(x=>`<li>${x}</li>`).join("")}</ul>
   <p class="small muted">※宿曜の舞台：${(SHUKU_PROFILE[shuku]||{}).stage||"人を支える領域"}。強みが活きる場を選ぶと、自然に評価が上がります。</p>`;
@@ -486,13 +470,14 @@ function MeaningText(lp,shuku, rng){
     33:"癒やしと芸術があなたの道になります。"
   }[lp] || "";
 
-  function choiceA(a){ return a[Math.floor(mulberry32(seedFrom(lp,shuku,variantOffset))()*a.length)]; }
+  const rngLocal = mulberry32(seedFrom(lp,shuku,variantOffset));
+  const pick = arr => arr[Math.floor(rngLocal()*arr.length)];
 
   return `
-  <p><strong>あなたが生まれてきた意味：</strong>${choiceA(open)}</p>
-  <p><strong>あなたの使命：</strong>${choiceA(mission)} ${tail}</p>
-  <p><strong>恋愛・仕事への影響：</strong>${choiceA(impact)}</p>
-  <p><strong>生き方のヒント：</strong>${choiceA(hint)}</p>`;
+  <p><strong>あなたが生まれてきた意味：</strong>${pick(open)}</p>
+  <p><strong>あなたの使命：</strong>${pick(mission)} ${tail}</p>
+  <p><strong>恋愛・仕事への影響：</strong>${pick(impact)}</p>
+  <p><strong>生き方のヒント：</strong>${pick(hint)}</p>`;
 }
 
 /* ========= 風水（安全版：11/22/33対応） ========= */
@@ -639,7 +624,7 @@ function BokuText(by,bm,bd){
   const LEAD = {
     1:["新しい風を入れる月。","始動に最適。まずは小さく着手。"],
     2:["人とのつながりを整える月。","協調が成果を運ぶ。"],
-    3:["発信を強める月。","アイデアを形に。量から質へ. "],
+    3:["発信を強める月。","アイデアを形に。量から質へ。"],
     4:["土台を整える月。","仕組み化で安定感UP。"],
     5:["刷新と変化の月。","固定観念を1つ外す。"],
     6:["愛とケアの月。","関係性と暮らしを整える。"],
