@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>あなたの鑑定｜数秘＋宿曜（風水なし・統合版）</title>
+<title>あなたの鑑定｜数秘＋宿曜（統合版・風水なし）</title>
 <style>
   :root{
     --bg:#0b0f14;--ink:#eaf1ff;--muted:#9fb1cf;--line:#223049;
@@ -48,15 +48,8 @@
   .kpi span{background:#0b1422;border:1px solid var(--line);border-radius:8px;padding:6px 10px}
   .flex{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
   .bad{color:var(--bad)}
-  /* pie */
-  .pie{width:140px;height:140px;border-radius:50%;
-       background: conic-gradient(#22d3ee var(--a), #34d399 0 var(--b),
-                                  #a5b4fc 0 var(--c), #f472b6 0 var(--d),
-                                  #60a5fa 0);}
-  .pie-wrap{display:flex;gap:16px;align-items:center;flex-wrap:wrap}
-  .legend{display:grid;gap:6px}
-  .legend span{display:inline-flex;gap:6px;align-items:center}
-  .legend i{display:inline-block;width:10px;height:10px;border-radius:2px}
+  /* simple dot list */
+  ul.clean{padding-left:1.1em} ul.clean li{margin:.3em 0}
 </style>
 </head>
 <body>
@@ -128,22 +121,19 @@
   <!-- 1. あなたの設計図 -->
   <div class="card" id="secDesign">
     <h2>1. あなたの設計図（5分でわかる）</h2>
-    <div id="designPie" class="pie-wrap"></div>
-    <div class="box" id="designText"></div>
-  </div>
-
-  <!-- 2. いまの季節 -->
-  <div class="card" id="secSeason">
-    <h2>2. いまの季節（個人年・月・日）</h2>
-    <div id="spark" class="box"></div>
-    <div id="seasonText"></div>
+    <div id="designText" class="box"></div>
   </div>
 
   <!-- 3. 一生のビッグウェーブ -->
   <div class="card" id="secPinn">
     <h2>3. 一生のビッグウェーブ（ピナクル＆チャレンジ）</h2>
-    <div id="pinnChart" class="box"></div>
     <div id="pinnText"></div>
+  </div>
+
+  <!-- 4. 生まれてきた意味・あなたの使命 -->
+  <div class="card" id="secMeaning">
+    <h2>4. 生まれてきた意味・あなたの使命</h2>
+    <div id="meaningText"></div>
   </div>
 
   <!-- 5. ふたりの取り扱い説明書 -->
@@ -250,7 +240,7 @@ const pYear=(bY,bM,bD,year)=>reduceNum(reduceNum(bM+bD)+reduceNum(year));
 const pMonth=(pyear,month)=>reduceNum(pyear+month);
 const pDay=(pmonth,day)=>reduceNum(pmonth+day);
 
-/* ===== 名前ベース（ローマ字推奨） ===== */
+/* ===== 名前（任意・ローマ字推奨） ===== */
 const LETTERS={A:1,J:1,S:1,B:2,K:2,T:2,C:3,L:3,U:3,D:4,M:4,V:4,E:5,N:5,W:5,F:6,O:6,X:6,G:7,P:7,Y:7,H:8,Q:8,Z:8,I:9,R:9};
 const VOWELS=new Set(["A","E","I","O","U","Y"]);
 function nameNumbers(raw){
@@ -268,7 +258,7 @@ function nameNumbers(raw){
   return {expression,soul,personality,raw:s};
 }
 
-/* ===== ピナクル＆チャレンジ ===== */
+/* ===== ピナクル＆チャレンジ（図なし要約用） ===== */
 function pinnacles(by,bm,bd){
   const P1=reduceNum(bm+bd);
   const P2=reduceNum(bd + reduceNum(by));
@@ -290,7 +280,7 @@ function pinnacleRanges(lp, birthYear){
   ].map(r=>({start:birthYear+r.from, end:birthYear+r.to}));
 }
 
-/* ========= テキストバリエーション ========= */
+/* ========= コピー辞書 ========= */
 const LP_COPY={
   1:["勢いと先導力。あなたが始めると空気が動く。迷ったら最初の一歩を最短で。","主役運。決める・進める・結果を出す、に強い。"],
   2:["調整と共感。人の気持ちをほどく手。当たり前の気遣いが武器。","縁をつなぐ橋渡し役。聞く力が人を救う。"],
@@ -322,62 +312,7 @@ const SH_COPY={
   "軫水蚓":"いやしと旅立ち。区切りをつける。"
 };
 
-/* ========= 行動テンプレ（拡張） ========= */
-const ACTION_WORK=[
-  "今日の最重要タスクを1行で書き出す→朝一で着手",
-  "15分タイマー×1本だけ集中する",
-  "成果を“見える化”して提出（画像/数値/一文）",
-  "不要な仕事を1つやめる宣言をする",
-  "チェックリストを1つだけ最新化",
-  "締切・目的・成果物を文章で確認",
-  "次の予定をカレンダーに入れてから作業を終える",
-  "台本化できる作業を1本作る",
-  "『誰の役に立つ？』をメモしてから始める",
-  "週の勝ちパターンを3行で振り返る",
-  "提案は2択で提示する",
-  "3行報告（やった・困り・次やる）を送る",
-  "数字（件数/時間/金額）のどれかで結果を示す",
-  "迷ったら“最初に小さくやる”を選ぶ",
-  "得意な型に名前をつけて保存",
-  "10分で終わる小タスクを3つ片づける",
-  "朝のメールは2本だけ返す→あとは昼にまとめて",
-  "“今日はやらない”と決める案件を1つ選ぶ"
-];
-const ACTION_LIFE=[
-  "返信ペースを事前に合意する",
-  "散歩10分でメンタルを整える",
-  "就寝前30分は画面オフ",
-  "朝一杯の白湯でリズムをつくる",
-  "週に1回、予定を捨てる時間をつくる",
-  "『ありがとう』を1日1回言葉にする",
-  "写真を撮って小さな喜びを可視化",
-  "お金・時間・家事の10分ミーティング（自分会議でもOK）",
-  "深呼吸5回→肩の力を抜く",
-  "考えすぎたら“今日はやらない”の勇気",
-  "買い物はリスト化して一度だけ",
-  "帰宅後5分だけ片づけ",
-  "朝の光を浴びる",
-  "“人の否定をしない”デーにする",
-  "やりたいことを3つ書いて1つだけやる",
-  "水分をマグ1杯多く飲む",
-  "夜は湯船に5分だけ入る",
-  "SNSは朝・夜の2回だけにする"
-];
-
-/* ========= 個人日→“いつ・何が起きる” ========= */
-const DAY_EXPLAIN={
-  1:{label:"始動日",what:"新しいことを始める/宣言する",action:"小さく着手・名付け・告知"},
-  2:{label:"調整日",what:"相談・根回し・ペース合わせ",action:"相手の予定確認・役割分担"},
-  3:{label:"発信日",what:"SNS/提案/資料の“出す”が効く",action:"短く出す→反応を見る"},
-  4:{label:"整備日",what:"仕組み化・固定・ルーティン整備",action:"チェックリスト更新"},
-  5:{label:"変化日",what:"刷新/移動/模様替え/新体験",action:"『初めて』を1つ入れる"},
-  6:{label:"愛とケア",what:"家族/恋人/自分の体を整える",action:"会う・連絡・睡眠を確保"},
-  7:{label:"内省日",what:"学び・調査・静かな集中",action:"1テーマを深掘り30分"},
-  8:{label:"成果日",what:"契約・交渉・評価・入金",action:"実績を数字で伝える"},
-  9:{label:"完了日",what:"手放し・締め切り・リセット",action:"不要1つ終了→次の余白を作る"}
-};
-
-/* ========= 関係名テンプレ ========= */
+/* ========= 相性関連 ========= */
 const REL_TONE={
   "命":"似た者同士で深く分かり合える相性。似すぎるゆえの張り合いは、役割分担で回避。",
   "友":"自然体で支え合える相性。日常がそのまま愛になる。",
@@ -409,139 +344,105 @@ const REL_BASE_SCORE={ "命":85,"栄":82,"友":80,"成":78,"安":76,"胎":74,"�
 function lpCompatDelta(a,b){ const diff=Math.abs(a-b); if(diff<=1) return +8; if(diff<=3) return +4; if(diff<=5) return 0; return -4; }
 function compatScore(rel,lpA,lpB){ const base=REL_BASE_SCORE[rel]??70; const delta=lpCompatDelta(lpA,lpB); return clamp(base+delta,40,99); }
 
-/* ========= 1. 設計図 ========= */
-function renderDesign(targetPie, targetText, y,m,d, nameInfo, shuku, rng){
+/* ========= 1. 設計図（3倍文章） ========= */
+function renderDesign(target, y,m,d, nameInfo, shuku, rng){
   const lp=lifePath(y,m,d), bn=birthNumber(d);
-  const KPIs=[
-    {k:"Life Path", v:lp},
-    {k:"誕生数", v:bn},
-    ...(nameInfo?[
-      {k:"Expression", v:nameInfo.expression},
-      {k:"Soul Urge", v:nameInfo.soul},
-      {k:"Personality", v:nameInfo.personality}
-    ]:[])
-  ];
-  const total=KPIs.length;
-  const slice=360/Math.max(total,1);
-  targetPie.innerHTML = (()=>{
-    // conic-gradient用の停止角を（最大5スライス想定で）流し込む
-    const vars = [...Array(Math.min(5,total))].map((_,i)=>`--${String.fromCharCode(97+i)}:${(i+1)*slice}deg`).join(";");
-    const legend = KPIs.map((o,i)=>`<span><i style="background:var(--accent);opacity:${0.6+i*0.1}"></i>${o.k}：<strong>${o.v}</strong></span>`).join("");
-    return `<div class="pie" style="${vars}"></div><div class="legend">${legend}</div>`;
-  })();
-
   const lpCopy = choice(rng, LP_COPY[lp]||["等身大でいくほど運が整う。"]);
   const shCopy = SH_COPY[shuku] || "自分のリズムでOK。";
-  const oneLiner = `「${lp}×${shuku}」：${lpCopy} ${shCopy}`;
-  targetText.innerHTML = `
-    <p class="lead">🌟 ${oneLiner}</p>
-    <p><strong>いまのあなたを一言で：</strong> ${lpCopy}</p>
-    <p><strong>動き方のヒント：</strong> ${shCopy}</p>`;
-}
 
-/* ========= 2. いまの季節（30日予定＋3行アクション） ========= */
-function renderSeason(targetSpark, targetText, y,m,d){
-  const now=new Date();
-  const py=pYear(y,m,d, now.getFullYear());
-  const pm=pMonth(py, now.getMonth()+1);
-  const todayPd=pDay(pm, now.getDate());
-
-  // 30日スパークライン
-  const days=30; const values=[...Array(days)].map((_,i)=>((todayPd+i-1)%9)+1);
-  const w=300,h=60; const step=w/(days-1);
-  const points=values.map((v,i)=>`${i*step},${h-(v/9)*h}`).join(" ");
-  targetSpark.innerHTML=`
-    <svg width="${w}" height="${h}" viewBox="0 0 ${w} ${h}">
-      <polyline points="${points}" fill="none" stroke="white" stroke-width="2" opacity="0.6"/>
-    </svg>
-    <div class="small muted">※今日は個人日<strong> ${todayPd}</strong>（${DAY_EXPLAIN[todayPd].label}）。右へ行くほど未来30日。</div>`;
-
-  // 重要日（1/5/8/9）を日付つきで
-  const important=[1,5,8,9];
-  let bullets=[];
-  for(let i=0;i<days;i++){
-    const dt=new Date(now.getFullYear(), now.getMonth(), now.getDate()+i);
-    const pd=((todayPd+i-1)%9)+1;
-    if(important.includes(pd)){
-      const mm=dt.getMonth()+1, dd=String(dt.getDate()).padStart(2,"0");
-      const exp=DAY_EXPLAIN[pd];
-      bullets.push(`• <strong>${mm}/${dd}</strong>：${exp.label} → ${exp.what}（行動：${exp.action}）`);
-    }
-    if(bullets.length>=8) break;
+  // 名前からの数値（任意）
+  let nmBlock="";
+  if(nameInfo){
+    nmBlock = `／Expression ${nameInfo.expression}／Soul Urge ${nameInfo.soul}／Personality ${nameInfo.personality}`;
   }
 
-  // 3行アクション
-  const rng=mulberry32(seedFrom("season",y,m,d,py,pm,todayPd));
-  const a1=choice(rng, ACTION_WORK);
-  const a2=choice(rng, ACTION_LIFE);
-  const a3=choice(rng, ACTION_LIFE.filter(x=>x!==a2));
+  const bestHours = {
+    1:"朝の始動1時間",2:"午前の対話時間",3:"昼の発信タイム",
+    4:"夕方の整備時間",5:"午後の移動時間",6:"夜のケア時間",
+    7:"早朝の静かな時間",8:"午前の交渉帯",9:"日暮れ前の締め時間",
+    11:"ひらめく隙間時間",22:"午前の企画会議",33:"夕方のやさしい時間"
+  }[lp] || "自分が落ち着く時間";
 
-  targetText.innerHTML=`
-    <p><strong>個人年：</strong>${py}　<strong>個人月：</strong>${pm}　<strong>個人日：</strong>${todayPd}（${DAY_EXPLAIN[todayPd].label}）</p>
-    <div class="box">
-      <p class="lead"><strong>今後30日の“起きやすいこと”</strong></p>
-      <p class="small">${bullets.join("<br>")}</p>
-    </div>
-    <div class="box">
-      <p class="lead"><strong>今日からの3行アクション</strong></p>
-      <p>💼 仕事：${a1}</p>
-      <p>🤝 対人：${a2}</p>
-      <p>🧘 自己ケア：${a3}</p>
-    </div>`;
+  target.innerHTML=`
+    <p class="lead">🌟 <strong>${lp} × ${shuku}</strong>：${lpCopy} ${shCopy}${nmBlock}</p>
+    <ul class="clean">
+      <li><strong>性格の土台：</strong> ライフパス<strong>${lp}</strong>は「${lpCopy}」。誕生数<strong>${bn}</strong>が日常のクセを整え、動きに安定感を与えます。</li>
+      <li><strong>得意な進め方：</strong> ${shCopy}。まずは<strong>小さく着手→見せる→整える</strong>の順が最短ルート。</li>
+      <li><strong>つまずきやすい所：</strong> 迷いすぎ/完璧主義/詰め込み過ぎ。<strong>“やらないこと”を先に決める</strong>と一気に軽くなります。</li>
+      <li><strong>仕事の勝ち筋：</strong> 「誰のために」「何を変えるか」を1行で決めてから動く。<strong>成果は数字/写真/一文</strong>で可視化。</li>
+      <li><strong>恋愛のツボ：</strong> 返信ペースの合意と、短時間でも会う習慣。<strong>同じ体験</strong>を増やすと距離が縮みます。</li>
+      <li><strong>今日の合言葉：</strong> <em>“小さく出す→反応を見る→一段整える”</em>。ベスト時間帯は<strong>${bestHours}</strong>。</li>
+    </ul>`;
 }
 
-/* ========= 3. ピナクル（年齢レンジ＋合言葉） ========= */
-function renderPinn(targetChart, targetText, y,m,d){
-  const lp=lifePath(y,m,d);
-  const pin=pinnacles(y,m,d);
-  const ranges=pinnacleRanges(lp,y);
-  const W=320,H=34; const total=ranges[ranges.length-1].end - ranges[0].start;
-  function seg(x){ const w=(x.end-x.start)/total*W; return w; }
-  const colors=["#22d3ee","#34d399","#a5b4fc","#60a5fa"];
-  let x=0, bars="";
-  ranges.forEach((r,i)=>{ const w=seg(r); bars+=`<rect x="${x}" y="4" width="${w}" height="26" rx="6" fill="${colors[i]}"/>`; x+=w; });
-  targetChart.innerHTML=`
-    <svg width="${W}" height="${H}">${bars}
-      <text x="6" y="23" fill="#0b1422" font-size="12">第1 P${pin.P[0]} / C${pin.C[0]}</text>
-      <text x="${W/3+6}" y="23" fill="#0b1422" font-size="12">第2 P${pin.P[1]} / C${pin.C[1]}</text>
-      <text x="${(W*2)/3+6}" y="23" fill="#0b1422" font-size="12">第3 P${pin.P[2]} / C${pin.C[2]}</text>
-    </svg>
-    <div class="small muted">年齢レンジ：第1 ${ranges[0].start}–${ranges[0].end}／第2 ${ranges[1].start}–${ranges[1].end}／第3 ${ranges[2].start}–${ranges[2].end}／第4 ${ranges[3].start}+（P=ピナクル, C=チャレンジ）</div>`;
+/* ========= 3. ピナクル：図なし6行要約 ========= */
+function renderPinnText(target, y,m,d){
+  const lp = lifePath(y,m,d);
+  const pin = pinnacles(y,m,d);
+  const ranges = pinnacleRanges(lp,y);
+  function age(i){ return `${ranges[i].start - y}〜${ranges[i].end - y}歳`; }
+  const Pname = n => ({
+    1:"始める力",2:"聞く力",3:"表現力",4:"土台づくり",5:"刷新と自由",
+    6:"ケアと調和",7:"探究と学び",8:"実現と交渉",9:"手放して次へ",
+    11:"直感の橋",22:"大きな器",33:"やさしさの仕組み化"
+  }[n] || "等身大");
+  const Cname = n => ({
+    1:"独りで抱えすぎ注意",2:"遠慮し過ぎ注意",3:"言い過ぎ注意",4:"固くなり過ぎ注意",
+    5:"落ち着き不足注意",6:"お世話し過ぎ注意",7:"考え過ぎ注意",8:"権限強すぎ注意",
+    9:"情に流され過ぎ注意",11:"直感頼み過ぎ注意",22:"大風呂敷注意",33:"自己犠牲し過ぎ注意"
+  }[n] || "バランス注意");
 
-  const PHRA={
-    1:["始動・主導・最短の一歩","“まずやる”が勝ち"],
-    2:["協力・調整・聞く力","聞いて整える"],
-    3:["表現・発信・遊び心","出して磨く"],
-    4:["土台・継続・仕組み化","整えて固定"],
-    5:["刷新・旅・自由","環境を変える"],
-    6:["ケア・調和・責任","暮らしを整える"],
-    7:["探究・内省・専門性","深く学ぶ"],
-    8:["実現・交渉・成果","数字で交渉"],
-    9:["奉仕・共感・完了","手放して次へ"],
-    11:["直感・啓発","“来た”を試す"],
-    22:["大計画・構築","器を作る"],
-    33:["癒やし・芸術","やさしさを形に"]
-  };
-  function line(i){
-    const p=pin.P[i], c=pin.C[i];
-    const kw=(PHRA[p]||["等身大で","丁寧に"]);
-    const ageFrom=ranges[i].start - y, ageTo=ranges[i].end - y;
-    return `第${i+1}期（${ageFrom}〜${ageTo}歳）：<strong>P${p}</strong>＝${kw[0]}／合言葉：${kw[1]}／チャレンジ：C${c}`;
-    }
-  targetText.innerHTML=`
-    <p class="lead">⛰️ ${line(0)}</p>
-    <p>${line(1)}</p>
-    <p>${line(2)}</p>
-    <p>第4期（${ranges[3].start - y}歳〜）：<strong>P${pin.P[3]}</strong>がゆっくり効き続けます。無理なく、積み上げを大切に。</p>`;
+  target.innerHTML = `
+    <p class="lead">⛰️ 人生は4つの季節に分かれます。各期のテーマ（P）と気をつける点（C）を、やること一行に落としました。</p>
+    <p>① <strong>${age(0)}</strong>：P${pin.P[0]}＝${Pname(pin.P[0])} ／ C${pin.C[0]}＝${Cname(pin.C[0])} → <strong>やること：</strong>小さく始めて型を作る。</p>
+    <p>② <strong>${age(1)}</strong>：P${pin.P[1]}＝${Pname(pin.P[1])} ／ C${pin.C[1]}＝${Cname(pin.C[1])} → <strong>やること：</strong>人と組んで広げる。聞いて整える。</p>
+    <p>③ <strong>${age(2)}</strong>：P${pin.P[2]}＝${Pname(pin.P[2])} ／ C${pin.C[2]}＝${Cname(pin.C[2])} → <strong>やること：</strong>発信と成果を両輪に、数字で示す。</p>
+    <p>④ <strong>${ranges[3].start - y}歳〜</strong>：P${pin.P[3]}＝${Pname(pin.P[3])} ／ C${pin.C[3]}＝${Cname(pin.C[3])} → <strong>やること：</strong>手放して次の器へ、無理なく継続。</p>
+    <p>合言葉：<em>『はじめる→つなぐ→見せる→ゆだねる』</em>。どの期でも<strong>“等身大でコツコツ”</strong>が最短距離。</p>`;
 }
 
-/* ========= ふたりの取り扱い：テンプレ ========= */
+/* ========= 4. 生まれてきた意味・使命（7行） ========= */
+function renderMeaning(target, lp, shuku, rng){
+  const open = [
+    "あなたは、目の前の人の重さを少しだけ軽くするために生まれてきました。",
+    "あなたの役目は、暗い場所に小さな灯りを置くこと。派手さより、確かさです。",
+    "あなたの存在は、場の空気を整え、人の不安を静めます。"
+  ];
+  const mission = [
+    "言葉・行動・体験のどれかで“前に進む力”を渡すこと。",
+    "成果を急がず、毎日の小さな改善を積み上げること。",
+    "人の気持ちに寄り添い、実用の工夫で助けること。"
+  ];
+  const impact = [
+    "仕事では、数字か写真か一文で結果を見せるほど信頼が増えます。",
+    "恋愛では、“安心できる時間”を増やすほど関係が深まります。",
+    "迷ったら、捨てる→整える→始める、の順で。"
+  ];
+  const hint = [
+    "今日できる最小の一歩を選ぶ。5分でOK。",
+    "週に一度、予定を捨てる日を作る。空白が直感を育てます。",
+    "『ありがとう』を言葉で返す。循環が太くなります。"
+  ];
+  const t1=choice(rng, open), t2=choice(rng, mission), t3=choice(rng, impact), t4=choice(rng, hint);
+  target.innerHTML = `
+    <ul class="clean">
+      <li><strong>意味：</strong>${t1}</li>
+      <li><strong>使命：</strong>${t2}</li>
+      <li><strong>活かし方：</strong>${t3}</li>
+      <li><strong>合言葉：</strong>“小さく・具体的に・今すぐ”。</li>
+      <li><strong>弱さの扱い方：</strong>完璧主義と比べ癖を手放す。等身大でOK。</li>
+      <li><strong>環境づくり：</strong>${SH_COPY[shuku]||"自分のペースを守る"}／静かに集中できる場所を先に確保。</li>
+      <li><strong>今日の一歩：</strong>${t4}</li>
+    </ul>`;
+}
+
+/* ========= ふたりの取り扱い（1.5倍・やさしい日本語） ========= */
 const TALK_TOPICS=[
   "最近うれしかった小さなことを1つずつ話す",
   "来月やってみたいことを3つ出して1つ選ぶ",
   "お互いの“得意な家事”を宣言する",
   "今年のうちに終わらせたいことを共有",
-  "お金の使い道ベスト3を話す（投資/体験/学び）",
+  "お金の使い道ベスト3を話す（体験/学び/貯蓄）",
   "休みの日の“完璧じゃない過ごし方”を提案",
   "子どもの頃にハマったことを語り合う",
   "最近見て良かった動画/本を3分で紹介",
@@ -551,48 +452,27 @@ const TALK_TOPICS=[
   "“ありがとう”の伝え方を言語化する"
 ];
 const DATE_IDEAS=[
-  "90分だけの近所カフェはしご",
-  "静かな公園で季節の写真を撮る",
-  "新規オープンのお店に行く（行列NGなら朝イチ）",
-  "展示会→感想を3つだけ言い合う",
-  "短編映画/配信を同時視聴して感想をメモ",
-  "散歩しながら次の旅行の行き先を決める",
-  "図書館で“表紙借り”読書デート",
-  "お互いの好きな曲を3曲ずつ紹介",
-  "モーニングorブランチ限定デート",
-  "フードコートで“同じもの”を注文して食べる",
-  "二人で作る10分料理に挑戦",
-  "文房具店で“今年のノート”を選ぶ"
+  "90分だけの近所カフェはしご","静かな公園で季節の写真を撮る",
+  "展示会→感想を3つだけ言い合う","短編配信の同時視聴＋3行レビュー",
+  "散歩しながら次の旅行の行き先を決める","モーニング限定デート",
+  "フードコートで“同じもの”を注文","10分料理を一緒に作る"
 ];
 const REPAIR_STEPS=[
-  "5分だけ沈黙→深呼吸→『今何が怖い？』から始める",
+  "5分黙る→深呼吸→『今いちばん困ってること』を1つだけ言う",
   "事実/気持ち/望みの順で1分ずつ話す（タイマー使用）",
   "“ごめん/ありがとう/これからこうする”で締める",
-  "文字で伝えてから会う（300字以内）",
-  "一旦散歩→歩きながら話す（向かい合わない）",
-  "その日は合意事項だけ決めて早めに解散",
-  "寝る前に相手の良い所を1つ送る",
-  "次の日の同じ時間に10分だけ再開する"
+  "文字で送ってから会う（300字以内）","歩きながら話す（横並び）",
+  "その日は合意だけ決めて早めに解散","寝る前に相手の良い所を1つ送る"
 ];
 const MONEY_RULES=[
-  "割り勘or交互払いのどちらかを先に決める",
-  "月1で“お金・時間・家事”の10分会議をする",
-  "プレゼント上限を決めておく",
-  "急な大きい出費は“相談してから”",
-  "外食は月◯回までなど回数で管理",
-  "投資/貯蓄/娯楽の配分比率を決める",
-  "現金とキャッシュレスを使い分ける",
-  "旅費は“早割”を基本にする"
+  "割り勘か交互払いかを先に決める","月1回“お金・時間・家事”の10分会議",
+  "プレゼントの上限を決める","大きな出費は事前に相談",
+  "外食は回数で管理","投資/貯蓄/娯楽の配分を決める"
 ];
 const INTIMACY=[
-  "寝る前の5分ハグ or 手をつなぐ時間を固定",
-  "相手の苦手なスキンシップは“しない”合意",
-  "週1回だけ“お互いの話を聞くだけ”の日を作る",
-  "『疲れてる合図』を決めて、その日は優先的に休む",
-  "朝の“いってらっしゃい”を必ず言う",
-  "帰宅後すぐに“今日の一言”だけ共有",
-  "休日の午前は互いの一人時間にする",
-  "『今は話したくない』を尊重する"
+  "寝る前の5分ハグor手をつなぐ時間","苦手なスキンシップは“しない”合意",
+  "週1回“話を聞くだけの日”","『疲れてる合図』を決めて優先的に休む",
+  "朝の“いってらっしゃい”を必ず言う","帰宅後“今日の一言”だけ共有"
 ];
 
 function compatNarrative(rel,lpA,lpB,shA,shB,rng){
@@ -607,19 +487,19 @@ function compatNarrative(rel,lpA,lpB,shA,shB,rng){
 
   return `
     <p class="lead"><strong>関係の空気：</strong>${tone}</p>
-    <p>宿曜は「${shA}」×「${shB}」、数秘は ${lpA} と ${lpB}。似ている所は強み、違いは“合意のルール”で守れます。</p>
+    <p>宿曜は「${shA}」×「${shB}」、数秘は ${lpA} と ${lpB}。似ている所は強みになり、違いは“先に話して決めるルール”で守れます。</p>
     <div class="box">
       <p><strong>やること3つ：</strong>①${do3[0]}　②${do3[1]}　③${do3[2]}</p>
       <p><strong>やらないこと3つ：</strong>①${dont3[0]}　②${dont3[1]}　③${dont3[2]}</p>
       <p><strong>会話のタネ：</strong>${talk}</p>
       <p><strong>デート案：</strong>${dateIdea}</p>
-      <p><strong>ケンカの修復手順：</strong>${repair}</p>
+      <p><strong>仲直りの段取り：</strong>${repair}</p>
       <p><strong>お金のルール：</strong>${money}</p>
       <p><strong>距離感・スキンシップ：</strong>${closeness}</p>
     </div>`;
 }
 
-/* ========= 5. 相性レンダリング（重なり良い日） ========= */
+/* ========= 5. 相性レンダリング（30日ベスト日） ========= */
 function renderCompat(target, y,m,d, shA, lpA, tzSel){
   const rng=mulberry32(seedFrom("compat",y,m,d,shA.idx));
   const dB=document.getElementById("birthB").value;
@@ -631,7 +511,7 @@ function renderCompat(target, y,m,d, shA, lpA, tzSel){
   const rel=relationByDistance(dist);
   const score=compatScore(rel,lpA,lpB);
 
-  // 次の30日で“重なりが良い日”＝二人とも 1/5/8/9 のどれか
+  // 次の30日で“重なりが良い日”＝双方1/5/8/9
   const now=new Date();
   const pyA=pYear(y,m,d, now.getFullYear()), pmA=pMonth(pyA, now.getMonth()+1);
   const pyB=pYear(utcB.getUTCFullYear(),utcB.getUTCMonth()+1,utcB.getUTCDate(), now.getFullYear());
@@ -656,7 +536,7 @@ function renderCompat(target, y,m,d, shA, lpA, tzSel){
     </div>
     <p class="lead">恋愛相性（宿曜×数秘）：<strong>${score}/100</strong>｜関係名：<strong>${rel}</strong></p>
     ${compatNarrative(rel,lpA,lpB,shA.name,shB.name,rng)}
-    ${overlaps.length?`<div class="box"><p class="lead"><strong>次の30日：重なりが良い日</strong></p><ul>${pickOverlap}</ul></div>`:""}`;
+    ${overlaps.length?`<div class="box"><p class="lead"><strong>次の30日：息が合いやすい日</strong></p><ul class="clean">${pickOverlap}</ul></div>`:""}`;
 }
 
 /* ========= カレンダー（36ヶ月） ========= */
@@ -722,18 +602,18 @@ function renderAll(changeOnlyCopy=false){
   document.getElementById("shukuA").textContent=shA.name;
   document.getElementById("pyear").textContent=pYear(y,m,d,(new Date()).getFullYear());
 
-  // 表現バリエーション：固定 or 変化
+  // 表現バリエーション
   if(!changeOnlyCopy) variantOffset=0; else variantOffset++;
   const rng=mulberry32(seedFrom(y,m,d,shA.idx,variantOffset));
 
-  // 1. 設計図
-  renderDesign(document.getElementById("designPie"), document.getElementById("designText"), y,m,d, nameInfo, shA.name, rng);
+  // 1. 設計図（拡張）
+  renderDesign(document.getElementById("designText"), y,m,d, nameInfo, shA.name, rng);
 
-  // 2. いまの季節
-  renderSeason(document.getElementById("spark"), document.getElementById("seasonText"), y,m,d);
+  // 3. ピナクル（6行）
+  renderPinnText(document.getElementById("pinnText"), y,m,d);
 
-  // 3. ピナクル
-  renderPinn(document.getElementById("pinnChart"), document.getElementById("pinnText"), y,m,d);
+  // 4. 意味・使命（7行）
+  renderMeaning(document.getElementById("meaningText"), lpA, shA.name, rng);
 
   // 5. 相性
   renderCompat(document.getElementById("compat"), y,m,d, shA, lpA, tzSel);
